@@ -235,6 +235,8 @@ class RewardsCfg:
     energy = RewTerm(func=mdp.energy, weight=-2e-5)
 
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.5)
+    # 261013 hw: base_height
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-1.0, params={"target_height": 0.32})
 
     joint_pos = RewTerm(
         func=mdp.joint_position_penalty,
