@@ -107,6 +107,11 @@ export EDU_GO2_USD=/absolute/path/to/go2.usd
 
 ## Training and Evaluation
 
+<!-- 261013 hw: wandb -->
+Training logs to [wandb](https://wandb.ai) by default (project `edu_rl_lab`), and also writes
+local TensorBoard files. Run `wandb login` once per machine, or add `--logger tensorboard`
+to use TensorBoard only.
+
 ```bash
 # Check simulator integration with a small number of environments first.
 python scripts/rsl_rl/train.py --headless --num_envs 32 --max_iterations 2

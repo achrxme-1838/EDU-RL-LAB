@@ -16,6 +16,8 @@ parser.add_argument("--max_iterations", type=int, default=None)
 parser.add_argument("--run_name", default="", help="Optional suffix for the run directory.")
 parser.add_argument("--resume", action="store_true")
 parser.add_argument("--video_interval", type=int, default=2000)
+# 261013 hw: wandb
+parser.add_argument("--logger", choices=["wandb", "tensorboard"], help="Override the logger in ppo_cfg.py.")
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 cli_args.validate_args(parser, args)
@@ -48,6 +50,9 @@ def main():
         env_cfg.scene.num_envs = args.num_envs
     if args.max_iterations is not None:
         agent_cfg.max_iterations = args.max_iterations
+    # 261013 hw: wandb
+    if args.logger is not None:
+        agent_cfg.logger = args.logger
     torch.manual_seed(args.seed)
     torch.backends.cuda.matmul.allow_tf32 = True
     log_root = ROOT / "logs" / "rsl_rl" / agent_cfg.experiment_name
