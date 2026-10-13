@@ -225,7 +225,11 @@ class RewardsCfg:
         func=mdp.track_ang_vel_z_exp, weight=0.75, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    # w2d5 TODO: base penalties (4 terms)
+    base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
+    base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.5)
+    # 261013 hw: base_height
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-1.0, params={"target_height": 0.32})
 
     # w2d5 TODO: joint and action penalties (6 terms)
 
