@@ -14,7 +14,8 @@ if TYPE_CHECKING:
 
 def action_rate_l2(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Penalize the rate of change of the actions using L2 squared kernel."""
-    return torch.sum(torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1)
+    # w2d5 TODO 11
+    return torch.sum(torch.square(env.action_manager.action - env.action_manager.____), dim=1)
 
 
 def is_terminated(env: ManagerBasedRLEnv) -> torch.Tensor:

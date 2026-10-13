@@ -16,14 +16,16 @@ def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
     """Penalize z-axis base linear velocity using L2 squared kernel."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
-    return torch.square(asset.data.root_lin_vel_b[:, 2])
+    # w2d5 TODO 1, 2
+    return torch.square(asset.data.____[:, ____])
 
 
 def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize xy-axis base angular velocity using L2 squared kernel."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
-    return torch.sum(torch.square(asset.data.root_ang_vel_b[:, :2]), dim=1)
+    # w2d5 TODO 3, 4
+    return torch.sum(torch.square(asset.data.____[:, ____]), dim=1)
 
 
 def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -33,13 +35,8 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
     """
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
-    return torch.sum(torch.square(asset.data.projected_gravity_b[:, :2]), dim=1)
+    # w2d5 TODO 5
+    return torch.sum(torch.square(asset.data.____[:, :2]), dim=1)
 
 
-# 261013 hw: base_height
-def base_height_l2(
-    env: ManagerBasedRLEnv, target_height: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
-) -> torch.Tensor:
-    """Penalize base height deviation from the target using L2 squared kernel (flat terrain only)."""
-    asset: RigidObject = env.scene[asset_cfg.name]
-    return torch.square(asset.data.root_pos_w[:, 2] - target_height)
+# w2d5 TODO: base_height_l2
