@@ -231,7 +231,12 @@ class RewardsCfg:
     # 261013 hw: base_height
     base_height = RewTerm(func=mdp.base_height_l2, weight=-1.0, params={"target_height": 0.32})
 
-    # w2d5 TODO: joint and action penalties (6 terms)
+    joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-0.001)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
+    joint_torques = RewTerm(func=mdp.joint_torques_l2, weight=-2e-4)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.1)
+    dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-10.0)
+    energy = RewTerm(func=mdp.energy, weight=-2e-5)
 
 
 @configclass
