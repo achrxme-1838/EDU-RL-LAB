@@ -80,6 +80,7 @@ Install in a new conda environment, separate from your existing environments.
 The commands below target Linux x86_64. See also the
 [official Isaac Lab 2.3.0 installation guide](https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/installation/pip_installation.html).
 
+<!-- 261014 hw: install -->
 ```bash
 cd /path/to/edu_rl_lab
 conda env create -f environment.yml
@@ -91,7 +92,8 @@ python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://downl
 
 # Use a directory separate from any existing Isaac Lab checkout.
 git clone --depth 1 --branch v2.3.0 https://github.com/isaac-sim/IsaacLab.git ../IsaacLab-2.3.0
-# This project only needs isaaclab core. Do not install the external rsl-rl-lib package.
+# This project only needs isaaclab core. An env set up with ./isaaclab.sh --install also works:
+# scripts/rsl_rl/*.py put this repo first on sys.path, so the local rsl_rl is used.
 python -m pip install -e ../IsaacLab-2.3.0/source/isaaclab
 
 python -m pip install -e ".[dev]"
@@ -142,8 +144,9 @@ a checkpoint explicitly. Configurations and checkpoints are saved under
 `logs/rsl_rl/go2_velocity/<run>/`. At startup, the training script prints the
 path of the local PPO implementation it uses.
 
-The default terrain is a flat tile. The actor receives 48-dimensional observations,
-the critic receives 63-dimensional observations, and the policy controls 12 joints.
+<!-- 261014 hw: observation size -->
+The default terrain is a flat tile. The actor receives 45-dimensional observations,
+the critic receives 60-dimensional observations, and the policy controls 12 joints.
 Edit `edu_rl_lab/tasks/locomotion/go2_env_cfg.py` for environment settings and
 `agents/ppo_cfg.py` in the same directory for PPO settings.
 

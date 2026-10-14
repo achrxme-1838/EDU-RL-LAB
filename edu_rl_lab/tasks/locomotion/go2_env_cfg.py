@@ -15,8 +15,10 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
-from isaaclab.sensors import ContactSensorCfg
+# 261014 hw: demo
+from isaaclab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from isaaclab.terrains import TerrainImporterCfg
+from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # noqa: F401
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
@@ -65,7 +67,18 @@ class RobotSceneCfg(InteractiveSceneCfg):
     )
     robot: ArticulationCfg = ROBOT_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
-    contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
+    # 261014 hw: demo (height_scanner is not used in observations)
+    contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True, debug_vis=False
+    )
+    height_scanner = RayCasterCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/base",
+        offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
+        ray_alignment="yaw",
+        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+        debug_vis=False,
+        mesh_prim_paths=["/World/ground"],
+    )
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
         spawn=sim_utils.DomeLightCfg(
@@ -320,10 +333,15 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
         self.episode_length_s = 20.0
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
+        # 261014 hw: demo (camera follows the env 0 robot)
+        self.viewer.origin_type = "asset_root"
+        self.viewer.asset_name = "robot"
+        self.viewer.eye = (2.5, 2.5, 1.5)
         self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
         self.scene.contact_forces.update_period = self.sim.dt
+        self.scene.height_scanner.update_period = self.decimation * self.sim.dt
 
         if getattr(self.curriculum, "terrain_levels", None) is not None:
             if self.scene.terrain.terrain_generator is not None:
@@ -337,6 +355,8 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
 class Go2PlayEnvCfg(Go2EnvCfg):
     def __post_init__(self):
         super().__post_init__()
+        # 261014 hw: demo
+        # self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG
         self.scene.num_envs = 32
         self.scene.terrain.terrain_generator.num_rows = 2
         self.scene.terrain.terrain_generator.num_cols = 1
@@ -346,3 +366,25 @@ class Go2PlayEnvCfg(Go2EnvCfg):
         self.curriculum.terrain_levels = None
         self.curriculum.lin_vel_cmd_levels = None
         self.scene.terrain.terrain_generator.curriculum = False
+
+        # 261014 hw: demo (uncomment and change values only; the training cfg above stays unchanged)
+        # self.events.push_robot = EventCfg().push_robot
+        # self.events.push_robot.params["velocity_range"] = {"x": (-1.5, 1.5), "y": (-1.5, 1.5)}
+        # self.events.push_robot.interval_range_s = (2.0, 2.0)
+        # self.events.base_external_force_torque.params["force_range"] = (-20.0, 20.0)
+        # self.events.physics_material.params["static_friction_range"] = (0.1, 0.1)
+        # self.events.physics_material.params["dynamic_friction_range"] = (0.1, 0.1)
+        # self.events.add_base_mass.params["mass_distribution_params"] = (5.0, 5.0)
+        # self.events.reset_robot_joints.params["position_range"] = (0.5, 1.5)
+        # self.terminations.bad_orientation.params["limit_angle"] = 0.3
+        # self.terminations.base_contact = None
+        # self.terminations.bad_orientation = None
+        # self.episode_length_s = 5.0
+        # self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        # self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
+        # self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
+        # self.actions.JointPositionAction.scale = 0.5
+        # self.scene.contact_forces.debug_vis = True
+        # self.scene.height_scanner.debug_vis = True
+        # self.scene.robot.spawn.articulation_props.fix_root_link = True
+        # self.scene.robot.init_state.pos = (0.0, 0.0, 0.8)
