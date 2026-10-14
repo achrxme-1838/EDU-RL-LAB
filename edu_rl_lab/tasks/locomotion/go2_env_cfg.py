@@ -343,6 +343,10 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
         self.scene.contact_forces.update_period = self.sim.dt
         self.scene.height_scanner.update_period = self.decimation * self.sim.dt
 
+        # 261014 hw: day-4 experiments (uncomment one line; train and play both use it)
+        # self.scene.terrain.terrain_generator = STAIRS_TERRAIN_CFG
+        # self.terminations.base_contact = None
+
         if getattr(self.curriculum, "terrain_levels", None) is not None:
             if self.scene.terrain.terrain_generator is not None:
                 self.scene.terrain.terrain_generator.curriculum = True
@@ -388,3 +392,34 @@ class Go2PlayEnvCfg(Go2EnvCfg):
         # self.scene.height_scanner.debug_vis = True
         # self.scene.robot.spawn.articulation_props.fix_root_link = True
         # self.scene.robot.init_state.pos = (0.0, 0.0, 0.8)
+
+
+# 261014 hw: day-4 stairs terrain (used by the experiment line in Go2EnvCfg)
+STAIRS_TERRAIN_CFG = terrain_gen.TerrainGeneratorCfg(
+    size=(8.0, 8.0),
+    border_width=20.0,
+    num_rows=10,
+    num_cols=20,
+    horizontal_scale=0.1,
+    vertical_scale=0.005,
+    slope_threshold=0.75,
+    use_cache=False,
+    sub_terrains={
+        "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
+            proportion=0.5,
+            step_height_range=(0.05, 0.23),
+            step_width=0.3,
+            platform_width=3.0,
+            border_width=1.0,
+            holes=False,
+        ),
+        "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
+            proportion=0.5,
+            step_height_range=(0.05, 0.23),
+            step_width=0.3,
+            platform_width=3.0,
+            border_width=1.0,
+            holes=False,
+        ),
+    },
+)
