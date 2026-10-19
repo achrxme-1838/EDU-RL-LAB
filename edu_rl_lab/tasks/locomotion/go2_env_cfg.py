@@ -345,7 +345,7 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
 
         # 261014 hw: day-4 experiments (uncomment one line; train and play both use it)
         # self.scene.terrain.terrain_generator = STAIRS_TERRAIN_CFG
-        # self.terminations.base_contact = None
+        # self.terminations.base_contact = self.terminations.bad_orientation = None
 
         if getattr(self.curriculum, "terrain_levels", None) is not None:
             if self.scene.terrain.terrain_generator is not None:
@@ -380,7 +380,7 @@ class Go2PlayEnvCfg(Go2EnvCfg):
         # self.events.physics_material.params["dynamic_friction_range"] = (0.1, 0.1)
         # self.events.add_base_mass.params["mass_distribution_params"] = (5.0, 5.0)
         # self.events.reset_robot_joints.params["position_range"] = (0.5, 1.5)
-        # self.terminations.bad_orientation.params["limit_angle"] = 0.3
+        # self.terminations.bad_orientation.params["limit_angle"] = 0.05
         # self.terminations.base_contact = None
         # self.terminations.bad_orientation = None
         # self.episode_length_s = 5.0
