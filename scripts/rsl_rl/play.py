@@ -59,10 +59,19 @@ def main():
         obs = env.get_observations()
         step = 0
         limit = args.steps if args.steps is not None else (args.video_length if args.video else None)
+        # 261022 hw: day-5 reset count per termination term (cumulative, printed every 5 s)
+        tm = env.unwrapped.termination_manager
+        resets = dict.fromkeys(tm.active_terms, 0)
+        print_every = round(5.0 / env.unwrapped.step_dt)
         while app.is_running() and (limit is None or step < limit):
             with torch.inference_mode():
-                obs, _, _, _ = env.step(policy(obs))
+                obs, _, dones, _ = env.step(policy(obs))
+            # get_term() keeps the last episode's cause -> count only envs done this step
+            for name in resets:
+                resets[name] += int((tm.get_term(name) & dones.bool()).sum())
             step += 1
+            if step % print_every == 0:
+                print(f"[RESET] t={step * env.unwrapped.step_dt:.0f}s " + " ".join(f"{k}={v}" for k, v in resets.items()))
     finally:
         env.close()
 

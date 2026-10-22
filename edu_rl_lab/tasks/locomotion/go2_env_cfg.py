@@ -393,6 +393,11 @@ class Go2PlayEnvCfg(Go2EnvCfg):
         # self.scene.robot.spawn.articulation_props.fix_root_link = True
         # self.scene.robot.init_state.pos = (0.0, 0.0, 0.8)
 
+        # 261022 hw: day-5 (play only; terrain lines set 5x4 tiles themselves)
+        # self.scene.terrain.terrain_generator = STAIRS_TERRAIN_CFG.replace(num_rows=5, num_cols=4, curriculum=False)
+        # self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG.replace(num_rows=5, num_cols=4, curriculum=False)
+        # self.terminations.base_contact.params["sensor_cfg"] = SceneEntityCfg("contact_forces", body_names=["base", "Head_.*"])
+
 
 # 261014 hw: day-4 stairs terrain (used by the experiment line in Go2EnvCfg)
 STAIRS_TERRAIN_CFG = terrain_gen.TerrainGeneratorCfg(
