@@ -27,7 +27,8 @@ class OnPolicyRunner:
         train_cfg = self.cfg
         self.disable_logs = False
         self.gpu_world_size = 1
-        self.logger_type = "tensorboard"
+        # 261013 hw: wandb
+        self.logger_type = self.cfg.get("logger", "tensorboard")
         self.alg_cfg = train_cfg["algorithm"]
         self.policy_cfg = train_cfg["policy"]
         self.device = device
@@ -314,10 +315,16 @@ class OnPolicyRunner:
         return alg
 
     def _prepare_logging_writer(self):
-        """Write local TensorBoard logs for the PPO lesson."""
-        if self.cfg.get("logger", "tensorboard") != "tensorboard":
-            raise ValueError("Only the local tensorboard logger is supported.")
+        """Write local TensorBoard logs for the PPO lesson, also sent to wandb if selected."""
+        # 261013 hw: wandb
+        if self.logger_type not in ("tensorboard", "wandb"):
+            raise ValueError("Only the tensorboard and wandb loggers are supported.")
         if self.log_dir is not None and self.writer is None:
-            from torch.utils.tensorboard import SummaryWriter
+            if self.logger_type == "wandb":
+                from rsl_rl.utils.wandb_utils import WandbSummaryWriter
 
-            self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
+                self.writer = WandbSummaryWriter(self.log_dir, self.cfg, self.env.cfg)
+            else:
+                from torch.utils.tensorboard import SummaryWriter
+
+                self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
