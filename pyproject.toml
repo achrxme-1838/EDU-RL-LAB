@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "edu_rl_lab"
 version = "0.1.0"
-description = "An educational Go2 locomotion laboratory with local MDP terms and PPO"
+description = "An educational Go2 and A2 locomotion laboratory with local MDP terms and PPO"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 license = "Apache-2.0 AND BSD-3-Clause"
@@ -25,6 +25,9 @@ dev = ["ruff>=0.9", "build>=1"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["edu_rl_lab*", "rsl_rl*"]
+
+[tool.setuptools.package-data]
+edu_rl_lab = ["assets/robots/**/*.usd", "assets/robots/**/*.usda"]
 
 [tool.ruff]
 target-version = "py311"

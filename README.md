@@ -1,19 +1,20 @@
 # EDU RL LAB
 
-An educational repository for studying Go2 velocity tracking and PPO.
+An educational repository for studying Go2/A2 velocity tracking and PPO.
 Read and modify the MDP functions, action/command classes, actor/critic networks,
 rollout buffer, PPO updates, and training loop directly in this repository.
 
-- Scope: **Go2 locomotion · feedforward PPO · single GPU**
+- Scope: **Go2/A2 locomotion · feedforward PPO · single GPU**
 - Target versions: **Isaac Lab 2.3.0 · Isaac Sim 5.1.0 · Python 3.11**
-- Environment ID: `Edu-Go2-Velocity-v0`
+- Environment IDs: `Edu-Go2-Velocity-v0`, `Edu-A2-Velocity-v0`
 - Algorithm: a PPO subset of RSL-RL 3.0.1 included in the local `rsl_rl/` directory
 
 ## Structure
 
 ```text
 edu_rl_lab/
-├── assets/go2.py
+├── assets/{go2,a2}.py
+├── assets/robots/a2/           # Bundled A2 USD and referenced layers
 ├── mdp/
 │   ├── actions/
 │   │   ├── cfgs/actions_cfg.py
@@ -30,7 +31,8 @@ edu_rl_lab/
 │   └── curriculums.py
 ├── tasks/locomotion/
 │   ├── go2_env_cfg.py
-│   └── agents/ppo_cfg.py
+│   ├── a2_env_cfg.py
+│   └── agents/{ppo_cfg,a2_ppo_cfg}.py
 └── utils/
     ├── maths/maths.py          # Local math without Isaac/Omniverse dependencies
     ├── vecenv_wrapper.py
@@ -60,7 +62,7 @@ The project-specific `energy` and `joint_position_penalty` rewards live in
 `rewards/joint_rewards.py`; `air_time_variance_penalty` lives in
 `rewards/feet_rewards.py`. Upstream Spot implementations with overlapping names
 are kept in the `edu_rl_lab.mdp.spot` namespace. MDP reference implementations for
-other robots are included, but Go2 is the only registered environment.
+other robots are included. Go2 and A2 have registered environments.
 
 Math utilities follow DEX's `utils/maths/maths.py` layout and use the official
 Isaac Lab 2.3.0 implementation. All 59 public functions and internal helpers were
@@ -71,7 +73,7 @@ or Omniverse. All local MDP math imports point to this implementation.
 Local MDP code does not import `isaaclab.envs.mdp` or `isaaclab_tasks...mdp`,
 or inherit from their implementation classes. Isaac Lab still provides the
 simulator, articulations, sensors, manager interfaces, configuration utilities,
-and actuators. Mimic, environments and assets for other robots, hardware
+and actuators. Mimic, environments and assets beyond Go2/A2, hardware
 deployment, recurrent policies, and distillation are excluded.
 
 ## Installation
@@ -137,10 +139,48 @@ a checkpoint explicitly. Configurations and checkpoints are saved under
 `logs/rsl_rl/go2_velocity/<run>/`. At startup, the training script prints the
 path of the local PPO implementation it uses.
 
-The default terrain is a flat tile. The actor receives 48-dimensional observations,
-the critic receives 63-dimensional observations, and the policy controls 12 joints.
+The default Go2 terrain is a flat tile. The actor receives 45-dimensional observations,
+the critic receives 60-dimensional observations, and the policy controls 12 joints.
 Edit `edu_rl_lab/tasks/locomotion/go2_env_cfg.py` for environment settings and
 `agents/ppo_cfg.py` in the same directory for PPO settings.
+
+### A2 with DEX training settings
+
+`Edu-A2-Velocity-v0` ports `DEX_RL_LAB/dex_rl_lab/tasks/envs/control/a2_base/a2_base_rl.py`
+and its registered `BasePPORunnerCfg` into this repository. Edit
+`edu_rl_lab/tasks/locomotion/a2_env_cfg.py` and `agents/a2_ppo_cfg.py` for this task.
+
+- Actor: 225 inputs (45 values × 5 frames), `[512, 256, 128]` ELU, 12 actions.
+- Critic: 247 inputs (60 proprioceptive values + 187 height samples), same hidden layers.
+- Observation noise, clipping, scaling and term order match DEX. Histories are
+  flattened per term, oldest to newest, then concatenated in the observation manager.
+  This produces the same network input as DEX's later dictionary concatenation.
+- All 20 reward terms, seven terrain types, commands, curricula, randomization,
+  termination conditions and motor settings match the reference. Action smoothness
+  uses the current and two previous raw actions, cleared on episode reset.
+- 4096 environments, 0.005 s physics step, decimation 4, 20 s episodes;
+  PPO uses 24 steps/update, 10001 iterations, saves every 500 iterations, and no
+  observation normalization. The local PPO implementation is retained.
+- Play follows DEX: 64 environments and a 10 × 6 terrain grid; noise, pushes and
+  curricula remain enabled. It differs from the Go2 play configuration.
+
+The A2 USD overlay and its referenced USD layers are bundled under
+`edu_rl_lab/assets/robots/a2/`, retaining the original relative references and
+geometry. No DEX checkout or Python package is required. The `a2_nero` layers are
+the source geometry; the `a2_base` overlay disables the arm and mounting plate.
+Isaac Sim still supplies its built-in shaders; terrain/sky visuals use the same
+Isaac asset service as the reference. `EDU_A2_USD` optionally overrides the model.
+
+```bash
+python tests/smoke_a2.py
+python scripts/rsl_rl/train.py --task Edu-A2-Velocity-v0 --headless
+python scripts/rsl_rl/play.py --task Edu-A2-Velocity-v0 --num_envs 32
+tensorboard --logdir logs/rsl_rl/a2_base_rl
+```
+
+The smoke test uses local visuals, checks model dependencies, observation sizes,
+partial resets and action history, then runs two PPO updates. DEX's separate
+evaluation harness and checkpoint/optimizer format are not ported.
 
 ## Code Checks Without the Simulator
 

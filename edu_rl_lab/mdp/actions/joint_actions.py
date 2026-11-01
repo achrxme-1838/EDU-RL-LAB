@@ -194,3 +194,26 @@ class JointPositionAction(JointAction):
     def apply_actions(self):
         # set position targets
         self._asset.set_joint_position_target(self.processed_actions, joint_ids=self._joint_ids)
+
+
+class JointPositionActionWithHistory(JointPositionAction):
+    """Position targets with the two previous raw actions for DEX's smoothness reward.
+
+    Advance once per control step, before scale/offset/clip. Reset only the selected
+    environments, as DEX's ActionManagerWrapper does.
+    """
+
+    def __init__(self, cfg, env):
+        super().__init__(cfg, env)
+        self.prev_actions = torch.zeros_like(self.raw_actions)
+        self.prev_prev_actions = torch.zeros_like(self.raw_actions)
+
+    def process_actions(self, actions: torch.Tensor):
+        self.prev_prev_actions.copy_(self.prev_actions)
+        self.prev_actions.copy_(self.raw_actions)
+        super().process_actions(actions)
+
+    def reset(self, env_ids: Sequence[int] | None = None) -> None:
+        super().reset(env_ids)
+        self.prev_actions[env_ids] = 0.0
+        self.prev_prev_actions[env_ids] = 0.0

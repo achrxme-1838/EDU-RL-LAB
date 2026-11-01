@@ -1,4 +1,4 @@
-"""Train Go2 with the repository's PPO implementation."""
+"""Train a locomotion task with the repository's PPO implementation."""
 
 import argparse
 import sys
@@ -34,13 +34,12 @@ def main():
     from datetime import datetime
 
     from isaaclab.utils.io import dump_yaml
-    from edu_rl_lab.tasks.locomotion.agents.ppo_cfg import Go2PPORunnerCfg
-    from edu_rl_lab.tasks.locomotion.go2_env_cfg import Go2EnvCfg
+    from edu_rl_lab.tasks import load_task_configs
     from edu_rl_lab.utils.checkpoints import resolve_checkpoint
     from edu_rl_lab.utils.vecenv_wrapper import RslRlVecEnvWrapper
     from rsl_rl.runners import OnPolicyRunner
 
-    env_cfg, agent_cfg = Go2EnvCfg(), Go2PPORunnerCfg()
+    env_cfg, agent_cfg = load_task_configs(args.task)
     env_cfg.seed = agent_cfg.seed = args.seed
     if args.device is not None:
         env_cfg.sim.device = agent_cfg.device = args.device

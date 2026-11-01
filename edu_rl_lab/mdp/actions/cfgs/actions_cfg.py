@@ -42,3 +42,10 @@ class JointPositionActionCfg(JointActionCfg):
     If True, this flag results in overwriting the values of :attr:`offset` to the default joint positions
     from the articulation asset.
     """
+
+
+@configclass
+class JointPositionActionWithHistoryCfg(JointPositionActionCfg):
+    """Position action retaining two previous raw actions for smoothness rewards."""
+
+    class_type: type[ActionTerm] = joint_actions.JointPositionActionWithHistory

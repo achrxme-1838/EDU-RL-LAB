@@ -5,7 +5,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from edu_rl_lab.tasks import TASK_ID  # noqa: E402
+from edu_rl_lab.tasks import TASK_IDS  # noqa: E402
 
 if __name__ == "__main__":
-    print(f"{TASK_ID}  |  Go2 velocity tracking  |  PPO")
+    for task_id in TASK_IDS:
+        print(f"{task_id}  |  velocity tracking  |  PPO")

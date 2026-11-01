@@ -17,5 +17,7 @@ outputs/
 *.usda
 *.usdc
 *.usdz
+!edu_rl_lab/assets/robots/**/*.usd
+!edu_rl_lab/assets/robots/**/*.usda
 *.log
 .DS_Store

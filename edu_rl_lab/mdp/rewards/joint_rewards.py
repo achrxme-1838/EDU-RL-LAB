@@ -102,3 +102,23 @@ def stand_still_joint_deviation_l1(
     command = env.command_manager.get_command(command_name)
     # Penalize motion when command is nearly zero.
     return mdp.joint_deviation_l1(env, asset_cfg) * (torch.norm(command[:, :2], dim=1) < command_threshold)
+
+
+# A2 terms ported from DEX_RL_LAB.
+def joint_position_penalty_command_aware(
+    env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, stand_still_scale: float, velocity_threshold: float,
+    command_name: str | None = "base_velocity",
+) -> torch.Tensor:
+    """Penalize joint deviation, with stronger scaling when standing still.
+
+    Set command_name=None to decide standing solely from measured base XY speed.
+    The default preserves the velocity-command behavior of existing RL tasks.
+    """
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
+    moving = body_vel > velocity_threshold
+    if command_name is not None:
+        moving = moving | (torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > 0.0)
+    reward = torch.linalg.norm((asset.data.joint_pos - asset.data.default_joint_pos), dim=1)
+    return torch.where(moving, reward, stand_still_scale * reward)

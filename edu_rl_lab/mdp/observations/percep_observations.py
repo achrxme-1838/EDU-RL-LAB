@@ -14,6 +14,11 @@ from isaaclab.sensors import RayCaster
 
 
 
+def height_scan_finite(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float = 0.5) -> torch.Tensor:
+    """DEX height scan: replace missed rays with zero before observation clipping."""
+    return torch.nan_to_num(height_scan(env, sensor_cfg, offset), nan=0.0, posinf=0.0, neginf=0.0)
+
+
 def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float = 0.5) -> torch.Tensor:
     """Height scan from the given sensor w.r.t. the sensor's frame.
 

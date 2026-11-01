@@ -1,4 +1,4 @@
-"""Evaluate a saved Go2 policy."""
+"""Evaluate a saved locomotion policy."""
 
 import argparse
 import sys
@@ -26,13 +26,12 @@ def main():
     import gymnasium as gym
     import torch
 
-    from edu_rl_lab.tasks.locomotion.agents.ppo_cfg import Go2PPORunnerCfg
-    from edu_rl_lab.tasks.locomotion.go2_env_cfg import Go2PlayEnvCfg
+    from edu_rl_lab.tasks import load_task_configs
     from edu_rl_lab.utils.checkpoints import resolve_checkpoint
     from edu_rl_lab.utils.vecenv_wrapper import RslRlVecEnvWrapper
     from rsl_rl.runners import OnPolicyRunner
 
-    env_cfg, agent_cfg = Go2PlayEnvCfg(), Go2PPORunnerCfg()
+    env_cfg, agent_cfg = load_task_configs(args.task, play=True)
     env_cfg.seed = args.seed
     if args.device is not None:
         env_cfg.sim.device = agent_cfg.device = args.device

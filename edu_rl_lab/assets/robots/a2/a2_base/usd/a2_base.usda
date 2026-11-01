@@ -1,0 +1,43 @@
+#usda 1.0
+(
+    defaultPrim = "a2_base"
+    doc = "A2 body and legs from a2_nero_new, with the arm, gripper and mounting plate removed."
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "a2_base" (
+    prepend references = @../../a2_nero/usd/a2_nero_new.usd@
+)
+{
+    over "a2_nero_interface" (active = false) {}
+    over "nero_base_link" (active = false) {}
+    over "nero_link1" (active = false) {}
+    over "nero_link2" (active = false) {}
+    over "nero_link3" (active = false) {}
+    over "nero_link4" (active = false) {}
+    over "nero_link5" (active = false) {}
+    over "nero_link6" (active = false) {}
+    over "nero_link7" (active = false) {}
+    over "nero_gripper_flange" (active = false) {}
+    over "nero_gripper_base" (active = false) {}
+    over "nero_gripper_link1" (active = false) {}
+    over "nero_gripper_link2" (active = false) {}
+
+    over "joints"
+    {
+        over "a2_nero_interface_mount" (active = false) {}
+        over "a2_nero_mount" (active = false) {}
+        over "nero_joint1" (active = false) {}
+        over "nero_joint2" (active = false) {}
+        over "nero_joint3" (active = false) {}
+        over "nero_joint4" (active = false) {}
+        over "nero_joint5" (active = false) {}
+        over "nero_joint6" (active = false) {}
+        over "nero_joint7" (active = false) {}
+        over "nero_gripper_flange_joint" (active = false) {}
+        over "nero_gripper_base_joint" (active = false) {}
+        over "nero_gripper_joint1" (active = false) {}
+        over "nero_gripper_joint2" (active = false) {}
+    }
+}
