@@ -197,10 +197,10 @@ class JointPositionAction(JointAction):
 
 
 class JointPositionActionWithHistory(JointPositionAction):
-    """Position targets with the two previous raw actions for DEX's smoothness reward.
+    """Position targets with the two previous raw actions for the smoothness reward.
 
     Advance once per control step, before scale/offset/clip. Reset only the selected
-    environments, as DEX's ActionManagerWrapper does.
+    environments.
     """
 
     def __init__(self, cfg, env):
