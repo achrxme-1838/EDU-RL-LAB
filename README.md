@@ -184,6 +184,46 @@ tensorboard --logdir logs/rsl_rl/a2_base_rl
 The smoke test uses local visuals, checks model dependencies, observation sizes,
 partial resets and action history, then runs two PPO updates.
 
+### play에서 ONNX 생성 및 배포 폴더로 복사
+
+`scripts/rsl_rl/play.py`는 체크포인트를 불러온 직후 ONNX를 자동 생성한다.
+출력 위치는 `<체크포인트 폴더>/exported/<체크포인트 이름>/policy.onnx`다.
+예를 들어 `model_10001.pt`를 사용하면 `exported/model_10001/policy.onnx`에 저장된다.
+같은 체크포인트로 다시 실행하면 이 파일을 갱신한다.
+
+현재 A2 체크포인트를 생성·복사하는 예시는 다음과 같다. **개발 PC의 기존 Isaac Lab 환경에서** 실행한다.
+ONNX만 생성하고 play를 끝내려면 아래처럼 `--steps 1`을 사용한다.
+
+```bash
+cd /home/lim/rl_ws/edu_rl_lab
+export PYTHONNOUSERSITE=1
+# 기존 환경에 onnx가 없는 경우에만 설치한다. 신규 설치 시에는 프로젝트 의존성에 포함된다.
+python -m pip show onnx >/dev/null 2>&1 || python -m pip install 'onnx>=1.16,<2'
+
+python scripts/rsl_rl/play.py \
+  --task Edu-A2-Velocity-v0 \
+  --checkpoint logs/rsl_rl/a2_base_rl/2026-11-01_22-55-17_105020/model_10001.pt \
+  --headless --num_envs 1 --steps 1
+
+# play가 출력한 ONNX 경로에서 배포 저장소의 정책 폴더로 수동 복사한다.
+A2_ONNX_SOURCE="/home/lim/rl_ws/edu_rl_lab/logs/rsl_rl/a2_base_rl/2026-11-01_22-55-17_105020/exported/model_10001/policy.onnx"
+mkdir -p /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR
+cp -- "$A2_ONNX_SOURCE" /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR/policy.onnx
+sha256sum "$A2_ONNX_SOURCE" /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR/policy.onnx
+```
+
+일반 play 실행에도 export가 포함되므로 위 1스텝 실행을 별도로 반복할 필요는 없다.
+복사는 사용자가 선택해서 수행하며, play 자체가 다른 저장소에 파일을 복사하지는 않는다.
+다른 정책은 목적지 폴더 이름을 바꿔 저장한다. NX (a2)에는 해당 ONNX를 전달하고
+`unitree_rl_mjlab/deploy/robots/a2/config/deploy.yaml`의
+`policy_dir: networks/01_EDU_A2_STAIR/`에서 **폴더까지** 지정한다.
+배포 절차는 [sim2real 문서](../unitree_rl_mjlab/doc/sim2real.md)를 참고한다.
+
+ONNX에는 actor와 actor의 관측 정규화가 포함된다. A2의 현재 정책은 정규화를 사용하지 않는다.
+입력은 `obs: [1,225]`, 출력은 raw `actions: [1,12]`이며 float32다.
+관측 이력 구성, 관절 매핑, action scale/offset은 배포 코드에서 처리해야 한다.
+원본 체크포인트 이름·SHA-256·task·정규화 여부를 ONNX 메타데이터에 함께 기록한다.
+
 ## Code Checks Without the Simulator
 
 You can also run static code checks in a separate, new environment.
