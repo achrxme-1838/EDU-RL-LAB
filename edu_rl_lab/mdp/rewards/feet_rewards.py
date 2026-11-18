@@ -33,7 +33,10 @@ def feet_air_time(
     # - 출력: (num_envs,). 음수가 될 수 있음 (threshold보다 짧게 뜨면)
     # - 재료 (모두 접촉 센서 env.scene.sensors[sensor_cfg.name]에 있음)
     #   - 막 착지한 발: 센서의 compute_first_contact(env.step_dt) 메서드
+    #     돌려주는 값: 모양 (num_envs, 센서 body 수) bool. 이번 step 안에 막 땅에 닿은 body면 True
     #   - 직전 체공 시간: 센서 data의 last_air_time
+    #     뜻: 마지막으로 떠 있던 구간의 길이(초). 착지하는 순간 정해지고 다음 착지까지 그대로
+    #   - bool 텐서에 float 텐서를 곱하면 True = 1, False = 0으로 계산됨
     #   - 둘 다 발만 고르기: [:, sensor_cfg.body_ids]
     # - 정지 명령 mask: env.command_manager.get_command(command_name)의 앞 두 성분 크기
     # extract the used quantities (to enable type-hinting)
@@ -101,15 +104,15 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
 
     If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
     """
-    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    # compute the reward
-    air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
-    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
-    in_contact = contact_time > 0.0
-    in_mode_time = torch.where(in_contact, contact_time, air_time)
-    single_stance = torch.sum(in_contact.int(), dim=1) == 1
-    reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]
-    reward = torch.clamp(reward, max=threshold)
-    # no reward for zero command
-    reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
-    return reward
+    # 261119 hw: w2 실습
+    # 2주차 실습에서 쓰지 않는 함수. 목요일 도전 feet_air_time의 정답과 거의 같아 본문을 가림
+    # 원래 본문은 w2_result_thur부터 돌아옴
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    raise NotImplementedError("2주차 실습에서 쓰지 않는 함수")

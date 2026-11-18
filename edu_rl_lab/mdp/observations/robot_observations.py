@@ -144,7 +144,8 @@ def joint_effort(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
     # - 역할: 모터가 실제로 낸 토크
     # - 출력: (num_envs, 12), N·m
     # - 위치: asset.data. 이름에 torque가 들어간 필드가 둘 있음
-    #         모터 한계로 자르기 전(computed)과 실제로 가한 값 중 뒤의 것
+    #   - computed_torque: 모터 한계로 자르기 전 값 (쓰지 않음)
+    #   - 다른 하나: 한계로 자른 뒤 관절에 실제로 가한 값 (이것을 씀)
     # - 관절 선택은 기본-3과 같음
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
