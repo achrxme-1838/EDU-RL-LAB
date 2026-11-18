@@ -16,13 +16,13 @@ if TYPE_CHECKING:
 def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize z-axis base linear velocity using L2 squared kernel."""
     # 261119 hw: w2 실습
-    # [w2 수 | 예시] 몸체 상하 속도 벌점 (풀이 예시)
+    # [w2 수 | 예시] base 상하 속도 패널티 (풀이 예시)
     #
     # - 수식: v_z^2
-    # - 출력: (num_envs,), 0 이상. cfg의 음수 weight가 곱해져 벌점이 됨
+    # - 출력: (num_envs,), 0 이상. cfg의 음수 weight가 곱해져 패널티가 됨
     #
     # 1. 로봇 가져오기
-    # 2. 몸체 선속도(body frame)의 z 성분 [:, 2]
+    # 2. base 선속도(base 좌표계)의 z 성분 [:, 2]
     # 3. 제곱 (torch.square). 성분이 하나라 더할 필요 없음
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
@@ -32,13 +32,13 @@ def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize xy-axis base angular velocity using L2 squared kernel."""
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-2] 몸체 롤·피치 각속도 벌점
+    # [w2 수 | 기본-2] base 롤, 피치 각속도 패널티
     #
     # - 수식: w_x^2 + w_y^2
     # - 출력: (num_envs,)
     #
     # 1. 로봇 가져오기
-    # 2. 몸체 각속도(body frame)의 x, y 성분 → [:, :2]
+    # 2. base 각속도(base 좌표계)의 x, y 성분 → [:, :2]
     # 3. 제곱한 뒤 성분끼리 더하기 → torch.sum(..., dim=1)
     #    - dim=1을 빼면 env까지 모두 더해져 숫자 하나가 됨
     raise NotImplementedError("w2 수 | 기본-2: ang_vel_xy_l2 미작성")
@@ -50,7 +50,7 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
     This is computed by penalizing the xy-components of the projected gravity vector.
     """
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-3] 몸체 기울기 벌점
+    # [w2 수 | 기본-3] base 기울기 패널티
     #
     # - 수식: g_x^2 + g_y^2   (g = 화요일 기본-2의 projected gravity)
     # - 출력: (num_envs,)
@@ -87,14 +87,14 @@ def base_height_l2(
         sensor readings can adjust the target height to account for the terrain.
     """
     # 261119 hw: w2 실습
-    # [w2 수 | 중간-3] 몸체 높이 벌점
+    # [w2 수 | 중간-3] base 높이 패널티
     #
-    # - 수식: (몸체 z - 목표 높이)^2
+    # - 수식: (base z - 목표 높이)^2
     # - 출력: (num_envs,)
     # - 목표 높이 = target_height + 발밑 지형 높이
     #   - sensor_cfg가 있으면: 지형 높이 = _mean_finite_hit_height(sensor) (위 함수, 제공)
     #   - sensor_cfg가 None이면: 평지로 보고 target_height 그대로
-    # - 재료: env.scene[sensor_cfg.name] (RayCaster), asset.data.root_pos_w (world frame 위치)
+    # - 재료: env.scene[sensor_cfg.name] (RayCaster), asset.data.root_pos_w (월드 좌표계 위치)
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     raise NotImplementedError("w2 수 | 중간-3: base_height_l2 미작성")

@@ -1,4 +1,4 @@
-"""w2 실습 점검: 그날까지의 항목이 작성·등록됐는지, 함수 성질이 맞는지 확인 (headless, 8 env).
+"""w2 실습 점검: 그날까지의 항목을 작성하고 등록했는지, 함수 성질이 맞는지 확인 (headless, 8 env).
 
     python scripts/w2_check.py --day tue      # 화 항목
     python scripts/w2_check.py --day wed      # 화 + 수 항목
@@ -31,7 +31,7 @@ app = AppLauncher(args).app
 DAY = {"tue": 1, "wed": 2, "thur": 3}[args.day]
 CMD = "base_velocity"
 
-# 작성할 함수: (태그, 함수 이름, 종류, 출력 열 수). 종류 obs / pen(벌점, 0 이상) / rew(상) / event
+# 작성할 함수: (태그, 함수 이름, 종류, 출력 열 수). 종류 obs / pen(패널티, 0 이상) / rew(상) / event
 FUNCS = [
     ("화 기본-1", "base_ang_vel", "obs", 3),
     ("화 기본-2", "projected_gravity", "obs", 3),
@@ -109,7 +109,7 @@ DIM_TAGS = {1: ("화 기본-5", "화 중간-2"), 2: ("수 기본-1", "수 기본
 
 
 def day_of(tag):
-    # 261119 hw: w2 실습 점검 요일 (예시도 그 요일부터. 목 예시 undesired_contacts를 화·수에 요구하던 것 고침)
+    # 261119 hw: w2 실습 점검 요일 (예시도 그 요일부터. 목 예시 undesired_contacts를 화, 수에 요구하던 것 고침)
     return {"화": 1, "수": 2, "목": 3}[tag.split()[0]]
 
 
@@ -176,7 +176,7 @@ def check_registration(cfg):
             continue
         t, challenge = rew.get(name), "도전" in tag
         if t is None:
-            note = "미등록: 학습은 시작되지만 이 항목이 빠짐" if challenge else "a2_env_cfg.py에 등록 줄이 없음"
+            note = "학습은 시작되지만 이 항목이 빠짐" if challenge else "a2_env_cfg.py에 등록 줄이 없음"
             report("reward", tag, name, "미등록", note, block=not challenge)
             continue
         note = []
@@ -299,7 +299,7 @@ def main():
         except Exception as e:
             return None, f"{type(e).__name__}: {e}"
 
-    def set_body_vel(v_b, w_b):  # body frame 속도를 world frame으로 바꿔 시뮬레이터에 써 넣음
+    def set_body_vel(v_b, w_b):  # base 좌표계 속도를 월드 좌표계로 바꿔 시뮬레이터에 써 넣음
         q = robot.data.root_quat_w
         robot.write_root_velocity_to_sim(torch.cat([quat_apply(q, v_b), quat_apply(q, w_b)], dim=-1))
 
@@ -318,7 +318,7 @@ def main():
         if name == "projected_gravity":
             g = standing[name][0]
             if not (g[:, 2] < -0.9).all() or not torch.allclose(g.norm(dim=1), torch.ones(n, device=dev), atol=1e-2):
-                return [f"서 있을 때 z가 -1 근처가 아님 (z 평균 {g[:, 2].mean().item():.3f}). body frame(_b)인지 확인"]
+                return [f"서 있을 때 z가 -1 근처가 아님 (z 평균 {g[:, 2].mean().item():.3f}). base 좌표계(_b)인지 확인"]
         elif name == "joint_pos_rel":
             o, e = reset_pos
             if e is None and o.abs().max() > 0.05:
@@ -328,7 +328,7 @@ def main():
             set_body_vel(v_b, w_b)
             o, e = safe(name)
             if e or not torch.allclose(o, v_b if name == "base_lin_vel" else w_b, atol=1e-2):
-                return ["써 넣은 몸체 속도와 다름. 선속도/각속도, body frame(_b)인지 확인"]
+                return ["써 넣은 base 속도와 다름. 선속도/각속도, base 좌표계(_b)인지 확인"]
         elif name == "generated_commands":
             o, e = safe(name)
             if e or not torch.allclose(o, cmd.command):
@@ -343,7 +343,7 @@ def main():
                 return [e1 or e2]
             p = []
             if (same < 0.99).any():
-                p.append(f"몸체 속도 = command인데 1 근처가 아님 (최소 {same.min().item():.3f})")
+                p.append(f"base 속도 = command인데 1 근처가 아님 (최소 {same.min().item():.3f})")
             if (off > 0.9).any():
                 p.append("x, y 속도가 command와 0.5씩 달라도 1 근처. 오차 계산 확인")
             return p
@@ -355,7 +355,7 @@ def main():
             if e1 or e2:
                 return [e1 or e2]
             if (walk <= 0).all() or not torch.allclose(still, scale * walk, rtol=1e-3, atol=1e-6):
-                return [f"정지(command 0, 몸체 속도 0)일 때 벌점이 움직일 때의 stand_still_scale({scale})배가 아님"]
+                return [f"정지(command 0, base 속도 0)일 때 패널티가 움직일 때의 stand_still_scale({scale})배가 아님"]
         elif name == "feet_air_time":
             o, e = with_command([0.0, 0.0, 0.0], name)
             if e or (o != 0).any():
@@ -395,7 +395,7 @@ def main():
             env.step(zero)
         checked = [x for x in FUNCS if day_of(x[0]) <= DAY and written.get(x[1]) and x[2] != "event"]
         standing = {x[1]: safe(x[1]) for x in checked}
-        for _ in range(20):  # 무작위 action: 벌점이 0이 아닌 상태
+        for _ in range(20):  # 무작위 action: 패널티가 0이 아닌 상태
             env.step(torch.rand_like(zero) - 0.5)
         moving = {x[1]: safe(x[1]) for x in checked}
 
@@ -412,7 +412,7 @@ def main():
                 elif not torch.isfinite(o.float()).all():
                     p.append(f"{label}: nan/inf 있음")
                 elif kind == "pen" and (o < 0).any():
-                    p.append(f"{label}: 음수 {o.min().item():.3g} (벌점 함수는 0 이상)")
+                    p.append(f"{label}: 음수 {o.min().item():.3g} (패널티 함수는 0 이상)")
                 elif kind == "rew" and name != "feet_air_time" and ((o <= 0).any() or (o > 1 + 1e-5).any()):
                     p.append(f"{label}: 0 초과 1 이하가 아님 ({o.min().item():.3g}..{o.max().item():.3g})")
                 if p:
@@ -435,7 +435,7 @@ def main():
             pdim = sum(cols[fname(t)] for t in pol.values()) * (cfg.observations.policy.history_length or 1)
             cdim = sum(cols[fname(t)] for t in cri.values()) * (cfg.observations.critic.history_length or 1)
         except (KeyError, TypeError):
-            report("차원", "-", "policy·critic 입력", "경고", "등록 항목 중 오류·미작성이 있어 계산하지 않음", block=False)
+            report("차원", "-", "policy, critic 입력", "경고", "등록 항목 중 오류, 미작성이 있어 계산하지 않음", block=False)
         else:
             want_p, want_c, _ = DIMS[DAY]
             report("차원", DIM_TAGS[DAY][0], "policy 입력", "통과" if pdim == want_p else "오류", f"{pdim} (맞는 값 {want_p})")
