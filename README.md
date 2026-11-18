@@ -162,7 +162,7 @@ and `agents/a2_ppo_cfg.py`.
   randomization, termination conditions and motor settings. Action smoothness
   uses the current and two previous raw actions, cleared on episode reset.
 - 4096 environments, 0.005 s physics step, decimation 4, 20 s episodes;
-  PPO uses 24 steps/update, 10001 iterations, saves every 500 iterations, and no
+  PPO uses 24 steps/update, 5000 iterations <!-- 261119 hw: w2 실습 수업용 학습 길이 (정답 기준 10001) -->, saves every 500 iterations, and no
   observation normalization. The local PPO implementation is retained.
 - Play uses 64 environments and a 10 × 6 terrain grid; noise, pushes and
   curricula remain enabled. It differs from the Go2 play configuration.
