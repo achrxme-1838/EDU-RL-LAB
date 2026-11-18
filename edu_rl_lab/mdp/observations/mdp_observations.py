@@ -30,7 +30,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
     #    - action은 env.action_manager가 가지고 있음
     # 2. 그대로 return
     #
-    # - 흐름: 함수 → a2_env_cfg.py의 ObsTerm 등록 → 신경망 입력 12칸 × history 5
+    # - 흐름: 함수 → a2_env_cfg.py의 ObsTerm 등록 → 신경망 입력 12칸 × 이력 5
     if action_name is None:
         return env.action_manager.action
     else:
