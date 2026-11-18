@@ -37,7 +37,7 @@ def feet_air_time(
     #   - 직전 체공 시간: 센서 data의 last_air_time
     #     뜻: 마지막으로 떠 있던 구간의 길이(초). 착지하는 순간 정해지고 다음 착지까지 그대로
     #   - bool 텐서에 float 텐서를 곱하면 True = 1, False = 0으로 계산됨
-    #   - 둘 다 발만 고르기: [:, sensor_cfg.body_ids]
+    #   - 둘 다 발만 선택: [:, sensor_cfg.body_ids]
     # - 정지 명령 mask: env.command_manager.get_command(command_name)의 앞 두 성분 크기
     # extract the used quantities (to enable type-hinting)
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
@@ -58,7 +58,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     agent is penalized only when the feet are in contact with the ground.
     """
     # 261119 hw: w2 실습
-    # [w2 목 | 중간-1] 발 미끄러짐 벌점
+    # [w2 목 | 중간-1] 발 미끄러짐 패널티
     #
     # - 수식: sum_발 |v_발,xy| × (닿아 있는가 0/1)
     # - 출력: (num_envs,)
@@ -80,7 +80,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
 def air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize variance in the amount of time each foot spends in the air/on the ground relative to each other"""
     # 261119 hw: w2 실습
-    # [w2 목 | 제공] 네 발 체공·접지 시간의 고르기 (함수는 제공, 등록만 작성)
+    # [w2 목 | 제공] 네 발 체공, 접지 시간의 균일도 (함수는 제공, 등록만 작성)
     #
     # - 네 발의 last_air_time, last_contact_time 분산. 0.5초에서 자름
     # - 한 발만 오래 들거나 오래 딛으면 커짐
