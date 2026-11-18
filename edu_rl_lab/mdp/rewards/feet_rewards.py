@@ -104,15 +104,15 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
 
     If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
     """
-    # 261119 hw: w2 실습
-    # 2주차 실습에서 쓰지 않는 함수. 목요일 도전 feet_air_time의 정답과 거의 같아 본문을 가림
-    # 원래 본문은 w2_result_thur부터 돌아옴
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    raise NotImplementedError("2주차 실습에서 쓰지 않는 함수")
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # compute the reward
+    air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+    in_contact = contact_time > 0.0
+    in_mode_time = torch.where(in_contact, contact_time, air_time)
+    single_stance = torch.sum(in_contact.int(), dim=1) == 1
+    reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]
+    reward = torch.clamp(reward, max=threshold)
+    # no reward for zero command
+    reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
+    return reward
