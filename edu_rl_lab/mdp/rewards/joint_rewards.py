@@ -99,21 +99,21 @@ def joint_position_penalty(
     env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, stand_still_scale: float, velocity_threshold: float
 ) -> torch.Tensor:
     """Penalize joint position error from default on the articulation."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    cmd = torch.linalg.norm(env.command_manager.get_command("base_velocity"), dim=1)
-    body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
-    reward = torch.linalg.norm((asset.data.joint_pos - asset.data.default_joint_pos), dim=1)
-    return torch.where(torch.logical_or(cmd > 0.0, body_vel > velocity_threshold), reward, stand_still_scale * reward)
+    # 261119 hw: w2 실습
+    # 2주차 실습에서 쓰지 않는 함수. 수요일 도전 joint_position_penalty_command_aware의 정답과 거의 같아 본문을 가림
+    # 원래 본문은 w2_result_wed부터 돌아옴
+    #
+    #
+    raise NotImplementedError("2주차 실습에서 쓰지 않는 함수")
 
 
 def joint_deviation_l1(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    # compute out of limits constraints
-    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
-    return torch.sum(torch.abs(angle), dim=1)
+    # 261119 hw: w2 실습
+    # 2주차 실습에서 쓰지 않는 함수. 화요일 기본-3 joint_pos_rel의 정답과 거의 같아 본문을 가림
+    # 원래 본문은 w2_result_tue부터 돌아옴
+    #
+    raise NotImplementedError("2주차 실습에서 쓰지 않는 함수")
 
 
 def stand_still_joint_deviation_l1(
