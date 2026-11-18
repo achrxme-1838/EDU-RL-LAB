@@ -1,0 +1,201 @@
+[INFO][AppLauncher]: Using device: cuda:0
+[INFO][AppLauncher]: Loading experience file: /workspace/isaaclab/apps/isaaclab.python.headless.kit
+Loading user config located at: '/isaac-sim/kit/data/Kit/Isaac-Sim/5.1/user.config.json'
+[Info] [carb] Logging to file: /isaac-sim/kit/logs/Kit/Isaac-Sim/5.1/kit_20261118_163116.log
+2026-11-18T16:31:17Z [462ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-11-18T16:31:17Z [464ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-11-18T16:31:17Z [940ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [omni::physx::IPhysxBenchmarks v1.0] (plugin: <default plugin>), by client: omni.physics.physx.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-11-18T16:31:18Z [1,217ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-11-18T16:31:21Z [4,939ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-11-18T16:31:21Z [4,939ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-11-18T16:31:21Z [4,939ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA RTX A5000
+2026-11-18T16:31:22Z [5,104ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 535.183.01    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA RTX A5000                 | Yes: 0 |     | 24810   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2231      | 8070d965.. |
+|     |                                  |        |     |            | 1         |            |
+|---------------------------------------------------------------------------------------------|
+| 1   | NVIDIA RTX A5000                 |        |     | 24810   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2231      | 6bb0c08e.. |
+|     |                                  |        |     |            | 41        |            |
+|---------------------------------------------------------------------------------------------|
+| 2   | NVIDIA RTX A5000                 |        |     | 24810   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2231      | 2c5c2a23.. |
+|     |                                  |        |     |            | 81        |            |
+|---------------------------------------------------------------------------------------------|
+| 3   | NVIDIA RTX A5000                 |        |     | 24810   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2231      | a57c2d22.. |
+|     |                                  |        |     |            | c1        |            |
+|=============================================================================================|
+| OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 6.2.0-26-generic
+| Processor: AMD EPYC 7453 28-Core Processor
+| Cores: 28 | Logical Cores: 28
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 257536 | Free Memory: 243540
+| Total Page/Swap (MB): 0 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-11-18T16:31:22Z [5,947ms] [Warning] [omni.kvdb.plugin] Disabling key-value database because another kit process is locking it
+
+[36m======================================================================================[0m
+[36m[1m[INFO][IsaacLab]: Logging to file: /tmp/isaaclab/logs/isaaclab_2026-11-18_16-31-23.log[0m
+[36m======================================================================================[0m
+
+[33m16:31:23 [simulation_context.py] WARNING: The `enable_external_forces_every_iteration` parameter in the PhysxCfg is set to False. If you are experiencing noisy velocities, consider enabling this flag. You may need to slightly increase the number of velocity iterations (setting it to 1 or 2 rather than 0), together with this flag, to improve the accuracy of velocity updates.[0m
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Environment seed      : 0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.02
+	Environment step-size : 0.02
+[INFO] Generating terrains based on curriculum took : 0.003874 seconds
+[INFO]: Time taken for scene creation : 0.215029 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 8
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 0.573385 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Event Manager:  <EventManager> contains 2 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
+|    1     | add_base_mass             |
++----------+---------------------------+
++---------------------------------------+
+|  Active Event Terms in Mode: 'reset'  |
++--------+------------------------------+
+| Index  | Name                         |
++--------+------------------------------+
+|   0    | base_external_force_torque   |
+|   1    | reset_base                   |
+|   2    | reset_robot_joints           |
++--------+------------------------------+
+
+[INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
++---------------------+
+| Active Recorder Terms |
++-----------+---------+
+|   Index   | Name    |
++-----------+---------+
++-----------+---------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++--------------------------------------------+
+|      Active Action Terms (shape: 12)       |
++-------+------------------------+-----------+
+| Index | Name                   | Dimension |
++-------+------------------------+-----------+
+|   0   | LegJointPositionAction |        12 |
++-------+------------------------+-----------+
+
+[INFO] Observation Manager: <ObservationManager> contains 2 groups.
++------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (60,)) |
++-------------+--------------------------+-------------+
+|    Index    | Name                     |    Shape    |
++-------------+--------------------------+-------------+
+|      0      | last_action              |    (60,)    |
++-------------+--------------------------+-------------+
++------------------------------------------------------+
+| Active Observation Terms in Group: 'critic' (shape: (12,)) |
++-------------+--------------------------+-------------+
+|    Index    | Name                     |    Shape    |
++-------------+--------------------------+-------------+
+|      0      | last_action              |    (12,)    |
++-------------+--------------------------+-------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 3 active terms.
++------------------------------------+
+|      Active Termination Terms      |
++-------+-----------------+----------+
+| Index | Name            | Time Out |
++-------+-----------------+----------+
+|   0   | time_out        |   True   |
+|   1   | base_contact    |  False   |
+|   2   | bad_orientation |  False   |
++-------+-----------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 1 active terms.
++----------------------------------+
+|       Active Reward Terms        |
++-------+-----------------+--------+
+| Index | Name            | Weight |
++-------+-----------------+--------+
+|   0   | track_ang_vel_z |    0.5 |
++-------+-----------------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 2 active terms.
++----------------------------+
+|  Active Curriculum Terms   |
++-------+--------------------+
+| Index | Name               |
++-------+--------------------+
+|   0   | terrain_levels     |
+|   1   | lin_vel_cmd_levels |
++-------+--------------------+
+
+[INFO]: Completed setting up the environment...
+[33m16:31:24 [articulation.py] WARNING: The function 'set_external_force_and_torque' will be deprecated in a future release. Please use 'permanent_wrench_composer.set_forces_and_torques' instead.[0m
+
+구분 | 태그 | 항목 | 결과 | 내용
+--------------------------------------------------------------------------------
+policy | 화 기본-5 | base_ang_vel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+policy | 화 기본-5 | projected_gravity | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+policy | 화 기본-5 | joint_pos_rel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+policy | 화 기본-5 | joint_vel_rel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+policy | 화 예시 | last_action | 통과 | 
+critic | 화 중간-2 | base_lin_vel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 중간-2 | base_ang_vel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 중간-2 | projected_gravity | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 중간-2 | joint_pos_rel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 중간-2 | joint_vel_rel | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 중간-2 | joint_effort | 미등록 | a2_env_cfg.py에 등록 줄이 없음
+critic | 화 예시 | last_action | 통과 | 
+reward | 화 도전 | track_lin_vel_xy | 미등록 | 미등록: 학습은 시작되지만 이 항목이 빠짐
+reward | 화 예시 | track_ang_vel_z | 통과 | 
+함수 | 화 기본-1 | base_ang_vel | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 기본-2 | projected_gravity | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 기본-3 | joint_pos_rel | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 기본-4 | joint_vel_rel | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 중간-1 | base_lin_vel | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 중간-1 | joint_effort | 미작성 | raise NotImplementedError 줄이 남아 있음
+함수 | 화 도전 | track_lin_vel_xy_exp | 미작성 | raise NotImplementedError 줄이 남아 있음
+차원 | 화 기본-5 | policy 입력 | 오류 | 60 (맞는 값 210)
+차원 | 화 중간-2 | critic 입력 | 오류 | 12 (맞는 값 57)
+차원 | - | reward 항목 수 | 경고 | 1 (맞는 값 2)
+--------------------------------------------------------------------------------
+경고 (학습은 시작됨): 화 도전
+남은 태그: 화 기본-1, 화 기본-2, 화 기본-3, 화 기본-4, 화 기본-5, 화 중간-1, 화 중간-2
+There was an error running python
