@@ -236,7 +236,7 @@ class ObservationsCfg:
         """Observations for policy group."""
 
         # 261119 hw: w2 실습
-        # [w2 화 | 기본-5] policy obs 등록
+        # [w2 화 | 기본-5] policy 관측 등록
         #
         # - 형식: 이름 = ObsTerm(func=mdp.함수, scale=..., clip=(-100, 100))
         # - 순서: base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, last_action
@@ -246,7 +246,7 @@ class ObservationsCfg:
         #
         # (여기에 작성)
         #
-        # [w2 목 | 기본-1] obs noise (policy만, 목요일에 작성)
+        # [w2 목 | 기본-1] 관측 잡음 (policy만, 목요일에 작성)
         # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 덧셈 잡음
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
@@ -272,12 +272,12 @@ class ObservationsCfg:
         """Observations for critic group."""
 
         # 261119 hw: w2 실습
-        # [w2 화 | 중간-2] critic obs 등록
+        # [w2 화 | 중간-2] critic 관측 등록
         #
         # - 순서: base_lin_vel, base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, joint_effort, last_action
-        # - policy와 같은 항목은 같은 scale, clip. noise는 넣지 않음
+        # - policy와 같은 항목은 같은 scale, clip. 관측 잡음은 넣지 않음
         # - base_lin_vel: scale 없음, clip=(-100, 100) / joint_effort: scale 0.01, clip=(-100, 100)
-        # - critic은 history 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
+        # - critic은 이력 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
         #
         # (여기에 작성)
         #
