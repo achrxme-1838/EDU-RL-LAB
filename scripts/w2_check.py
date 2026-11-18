@@ -109,7 +109,8 @@ DIM_TAGS = {1: ("화 기본-5", "화 중간-2"), 2: ("수 기본-1", "수 기본
 
 
 def day_of(tag):
-    return 0 if "예시" in tag else {"화": 1, "수": 2, "목": 3}[tag.split()[0]]
+    # 261119 hw: w2 실습 점검 요일 (예시도 그 요일부터. 목 예시 undesired_contacts를 화·수에 요구하던 것 고침)
+    return {"화": 1, "수": 2, "목": 3}[tag.split()[0]]
 
 
 rows, blockers, warnings = [], [], []
@@ -473,5 +474,8 @@ if __name__ == "__main__":
         print_table()
         print("점검 중 오류: 위 traceback을 강의자에게 보여 주세요")
     finally:
-        app.close()
-    sys.exit(0 if ok else 1)
+        # 261119 hw: w2 실습 종료 코드 (app.close()가 프로세스를 끝내므로 SystemExit을 걸어 둔 채로 닫음)
+        try:
+            sys.exit(0 if ok else 1)
+        finally:
+            app.close()
