@@ -178,7 +178,7 @@ class EventCfg:
     # - 형식: 위 EventTerm들과 같음. 이름 push_robot
     # - mode: "startup" = 시작 때 한 번, "reset" = 에피소드마다, "interval" = 정해진 시간 간격마다
     # - 이 항목: mode "interval", interval_range_s=(5.0, 10.0)
-    #   params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}}  (몸체 속도를 갑자기 바꿔 미는 효과)
+    #   params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}}  (base 속도를 갑자기 바꿔 미는 효과)
     #
     # (여기에 작성)
 
@@ -295,7 +295,7 @@ class ObservationsCfg:
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
         # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247, 목요일에 작성)
-        # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 광선을 0으로 바꾸는 함수, 제공)
+        # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 ray를 0으로 바꾸는 함수, 제공)
         # - params={"sensor_cfg": SceneEntityCfg("height_scanner")}, clip=(-1.0, 5.0)
         # - 여러 줄로 써도 됨. 괄호 안에서는 줄을 바꿔도 이어진 한 줄로 읽힘
 
@@ -327,7 +327,7 @@ class RewardsCfg:
     )
 
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-6] 몸체·관절·action 벌점 등록 (weight가 음수 = 벌점)
+    # [w2 수 | 기본-6] base, 관절, action 패널티 등록 (weight가 음수면 패널티)
     #
     # - 예시 (그대로 써도 됨): base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
     # - 나머지는 같은 형식, params 없음
@@ -339,13 +339,13 @@ class RewardsCfg:
     #   | action_rate           | mdp.action_rate_l2       | -0.01 * 0.8         |
     #   | flat_orientation_l2   | mdp.flat_orientation_l2  | -0.01               |
     #
-    # [w2 수 | 중간-4] params가 있는 벌점과 나머지 등록
+    # [w2 수 | 중간-4] params가 있는 패널티와 나머지 등록
     #   | 이름              | func                      | weight      | params                                              |
     #   | base_height       | mdp.base_height_l2        | -1.0        | target_height 0.42, sensor_cfg = 센서 height_scanner |
     #   | action_smoothness | mdp.action_smoothness_l2  | -0.01 * 0.5 | 없음                                                |
     #   | dof_pos_limits    | mdp.joint_pos_limits      | -10.0       | 없음                                                |
     #   | energy            | mdp.energy                | -2e-5 * 0.5 | 없음                                                |
-    # - params 형식: params={"키": 값, ...}. 센서·로봇 지정은 SceneEntityCfg("이름")
+    # - params 형식: params={"키": 값, ...}. 센서, 로봇 지정은 SceneEntityCfg("이름")
     #
     # [w2 수 | 도전] joint_pos 등록 (함수 joint_position_penalty_command_aware도 직접 작성)
     # - weight -0.05
