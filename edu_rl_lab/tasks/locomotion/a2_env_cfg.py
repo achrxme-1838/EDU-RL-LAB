@@ -181,6 +181,12 @@ class EventCfg:
     #   params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}}  (몸체 속도를 갑자기 바꿔 미는 효과)
     #
     # (여기에 작성)
+    push_robot = EventTerm(
+        func=mdp.push_by_setting_velocity,
+        mode="interval",
+        interval_range_s=(5.0, 10.0),
+        params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
+    )
 
     # 261119 hw: w2 실습
     # [w2 목 | 중간-4] motor DR 등록 (함수는 randomize_events.py의 randomize_actuator_gains)
@@ -190,6 +196,16 @@ class EventCfg:
     #           stiffness_range, damping_range, strength_range 모두 (0.9, 1.1)
     #
     # (여기에 작성)
+    actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+            "stiffness_range": (0.9, 1.1),
+            "damping_range": (0.9, 1.1),
+            "strength_range": (0.9, 1.1),
+        },
+    )
 
 
 @configclass
@@ -251,8 +267,8 @@ class ObservationsCfg:
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
         # - 잡음은 __post_init__의 enable_corruption = True일 때만 적용됨
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100))
-        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100), noise=Unoise(n_min=-0.2, n_max=0.2))
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100), noise=Unoise(n_min=-0.05, n_max=0.05))
         #
         # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리
         # - func mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}, scale 없음
@@ -260,8 +276,10 @@ class ObservationsCfg:
         velocity_commands = ObsTerm(
             func=mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}
         )
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
-        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
+        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100), noise=Unoise(n_min=-0.01, n_max=0.01))
+        joint_vel_rel = ObsTerm(
+            func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100), noise=Unoise(n_min=-1.5, n_max=1.5)
+        )
         #
         # [w2 화 | 예시] last_action 등록 (풀이 예시). 함수는 mdp_observations.py
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
@@ -304,6 +322,11 @@ class ObservationsCfg:
         # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 광선을 0으로 바꾸는 함수, 제공)
         # - params={"sensor_cfg": SceneEntityCfg("height_scanner")}, clip=(-1.0, 5.0)
         # - 여러 줄로 써도 됨. 괄호 안에서는 줄을 바꿔도 이어진 한 줄로 읽힘
+        height_scan = ObsTerm(
+            func=mdp.height_scan_finite,
+            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+            clip=(-1.0, 5.0),
+        )
 
         def __post_init__(self):
             self.concatenate_terms = True
@@ -418,6 +441,58 @@ class RewardsCfg:
     # - params: sensor_cfg (접촉 센서, 발), command_name "base_velocity", threshold 0.5
     #
     # (여기에 작성)
+    feet_air_time = RewTerm(
+        func=mdp.feet_air_time,
+        weight=0.5,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
+            "command_name": "base_velocity",
+            "threshold": 0.5,
+        },
+    )
+    air_time_variance = RewTerm(
+        func=mdp.air_time_variance_penalty,
+        weight=-0.2,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot")},
+    )
+
+    feet_slide = RewTerm(
+        func=mdp.feet_slide,
+        weight=-0.1,
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_foot"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
+        },
+    )
+
+    feet_contact_forces = RewTerm(
+        func=mdp.contact_forces,
+        weight=-1e-5,
+        params={
+            "threshold": 200.0,
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
+        },
+    )
+
+    feet_clearance = RewTerm(
+        func=mdp.foot_clearance_reward,
+        weight=0.5,
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_foot"),
+            "target_height": 0.25,
+            "std": 0.5,
+            "tanh_mult": 2.0,
+        },
+    )
+
+    undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts,
+        weight=-2.0,
+        params={
+            "threshold": 1,
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_hip", ".*_thigh", ".*_calf"]),
+        },
+    )
 
 
 @configclass

@@ -38,4 +38,5 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
     # 4. 위 함수 height_scan_finite가 이 함수를 부르고, 안 닿은 광선(inf)을 0으로 바꿈 (제공)
     # extract the used quantities (to enable type-hinting)
     sensor: RayCaster = env.scene.sensors[sensor_cfg.name]
-    raise NotImplementedError("w2 목 | 기본-2: height_scan 미작성")
+    # height scan: height = sensor_height - hit_point_z - offset
+    return sensor.data.pos_w[:, 2].unsqueeze(1) - sensor.data.ray_hits_w[..., 2] - offset

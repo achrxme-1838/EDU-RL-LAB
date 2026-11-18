@@ -56,7 +56,13 @@ def contact_forces(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEn
     # - 1–3단계는 위 undesired_contacts(풀이 예시)와 같음
     # - 바꿀 곳: "threshold보다 큰가(참/거짓)" 대신 "threshold를 넘은 양"
     #   - 넘지 않은 곳은 0이 되게 자르기: .clip(min=0.0)
-    raise NotImplementedError("w2 목 | 기본-4: contact_forces 미작성")
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+    # compute the violation
+    violation = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] - threshold
+    # compute the penalty
+    return torch.sum(violation.clip(min=0.0), dim=1)
 
 
 def foot_clearance_reward(
@@ -71,4 +77,8 @@ def foot_clearance_reward(
     # - 뜻: 수평으로 움직이는 발(스윙 중인 발)만 목표 높이에 가까운지 봄. 디딘 발은 속도가 0이라 빠짐
     # - 재료: asset.data.body_pos_w, asset.data.body_lin_vel_w (world frame)
     #         모양 (num_envs, body 17, 3). 발 선택은 [:, asset_cfg.body_ids, 성분]
-    raise NotImplementedError("w2 목 | 중간-2: foot_clearance_reward 미작성")
+    asset: RigidObject = env.scene[asset_cfg.name]
+    foot_z_target_error = torch.square(asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - target_height)
+    foot_velocity_tanh = torch.tanh(tanh_mult * torch.norm(asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2))
+    reward = foot_z_target_error * foot_velocity_tanh
+    return torch.exp(-torch.sum(reward, dim=1) / std)

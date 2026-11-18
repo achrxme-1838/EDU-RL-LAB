@@ -334,4 +334,6 @@ def randomize_actuator_gains(
             continue
         kp0 = asset.data.default_joint_stiffness[env_ids][:, actuator.joint_indices]
         kd0 = asset.data.default_joint_damping[env_ids][:, actuator.joint_indices]
-        raise NotImplementedError("w2 목 | 중간-4: randomize_actuator_gains 미작성")
+        s = math_utils.sample_uniform(*strength_range, kp0.shape, device=asset.device)
+        actuator.stiffness[env_ids] = kp0 * math_utils.sample_uniform(*stiffness_range, kp0.shape, device=asset.device) * s
+        actuator.damping[env_ids] = kd0 * math_utils.sample_uniform(*damping_range, kd0.shape, device=asset.device) * s
