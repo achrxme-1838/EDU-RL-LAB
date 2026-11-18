@@ -246,13 +246,13 @@ class ObservationsCfg:
         #
         # (여기에 작성)
         #
-        # [w2 목 | 기본-1] obs noise (policy만) — 목요일에 작성
+        # [w2 목 | 기본-1] obs noise (policy만, 목요일에 작성)
         # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 덧셈 잡음
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
         # - 잡음은 __post_init__의 enable_corruption = True일 때만 적용됨
         #
-        # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리 — 수요일에 작성
+        # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리 (수요일에 작성)
         # - func mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}, scale 없음
         # - 입력 차원 45 × 5 = 225. deploy.yaml의 observations 순서도 같이 맞출 것
         #
@@ -281,10 +281,10 @@ class ObservationsCfg:
         #
         # (여기에 작성)
         #
-        # [w2 수 | 기본-1] critic의 velocity_commands도 projected_gravity 바로 다음 자리 (57 → 60) — 수요일에 작성
+        # [w2 수 | 기본-1] critic의 velocity_commands도 projected_gravity 바로 다음 자리 (57 → 60, 수요일에 작성)
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
-        # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247) — 목요일에 작성
+        # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247, 목요일에 작성)
         # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 광선을 0으로 바꾸는 함수, 제공)
         # - params={"sensor_cfg": SceneEntityCfg("height_scanner")}, clip=(-1.0, 5.0)
         # - 여러 줄로 써도 됨. 괄호 안에서는 줄을 바꿔도 이어진 한 줄로 읽힘
