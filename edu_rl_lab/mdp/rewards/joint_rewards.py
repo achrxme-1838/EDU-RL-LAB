@@ -31,7 +31,9 @@ def joint_vel_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
     # 1. 로봇 가져오기 (Articulation)
     # 2. 관절 속도: asset.data.joint_vel, 관절 선택 [:, asset_cfg.joint_ids]
     # 3. 제곱 → 관절끼리 더하기 (dim=1)
-    raise NotImplementedError("w2 수 | 기본-4: joint_vel_l2 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return torch.sum(torch.square(asset.data.joint_vel[:, asset_cfg.joint_ids]), dim=1)
 
 
 def joint_acc_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -44,7 +46,9 @@ def joint_acc_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
     #
     # - 수식: sum_j joint_acc_j^2
     # - joint_vel_l2와 같은 형태. asset.data에서 가속도 필드 찾기
-    raise NotImplementedError("w2 수 | 기본-4: joint_acc_l2 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return torch.sum(torch.square(asset.data.joint_acc[:, asset_cfg.joint_ids]), dim=1)
 
 
 def joint_torques_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -57,7 +61,9 @@ def joint_torques_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
     #
     # - 수식: sum_j torque_j^2
     # - joint_vel_l2와 같은 형태. 토크 필드는 화요일 중간-1 joint_effort에서 쓴 것
-    raise NotImplementedError("w2 수 | 기본-4: joint_torques_l2 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return torch.sum(torch.square(asset.data.applied_torque[:, asset_cfg.joint_ids]), dim=1)
 
 
 def joint_pos_limits(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -92,7 +98,11 @@ def energy(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("r
     # - 출력: (num_envs,)
     # - 재료: asset.data.joint_vel, asset.data.applied_torque
     #         관절 선택은 [:, asset_cfg.joint_ids]
-    raise NotImplementedError("w2 수 | 중간-1: energy 미작성")
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    qvel = asset.data.joint_vel[:, asset_cfg.joint_ids]
+    qfrc = asset.data.applied_torque[:, asset_cfg.joint_ids]
+    return torch.sum(torch.abs(qvel) * torch.abs(qfrc), dim=-1)
 
 
 def joint_position_penalty(
@@ -146,4 +156,11 @@ def joint_position_penalty_command_aware(
     # - 재료: asset.data.root_lin_vel_b, asset.data.joint_pos, asset.data.default_joint_pos
     #         env.command_manager.get_command(command_name)
     #         torch.linalg.norm(..., dim=1), torch.where(조건, 참일 때, 거짓일 때)
-    raise NotImplementedError("w2 수 | 도전: joint_position_penalty_command_aware 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
+    moving = body_vel > velocity_threshold
+    if command_name is not None:
+        moving = moving | (torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > 0.0)
+    reward = torch.linalg.norm((asset.data.joint_pos - asset.data.default_joint_pos), dim=1)
+    return torch.where(moving, reward, stand_still_scale * reward)

@@ -50,4 +50,4 @@ def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) 
     #    - last_action에서 env.action_manager를 쓴 것과 같은 형태
     # 2. 이름(command_name)으로 command 하나 꺼내기
     #    - command_manager의 메서드 중 get_으로 시작하는 것
-    raise NotImplementedError("w2 수 | 기본-1: generated_commands 미작성")
+    return env.command_manager.get_command(command_name)

@@ -257,6 +257,9 @@ class ObservationsCfg:
         # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리
         # - func mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}, scale 없음
         # - 입력 차원 45 × 5 = 225. deploy.yaml의 observations 순서도 같이 맞출 것
+        velocity_commands = ObsTerm(
+            func=mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}
+        )
         joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
         joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
         #
@@ -289,6 +292,9 @@ class ObservationsCfg:
         projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
         #
         # [w2 수 | 기본-1] critic의 velocity_commands도 projected_gravity 바로 다음 자리 (57 → 60)
+        velocity_commands = ObsTerm(
+            func=mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}
+        )
         joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
         joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
         joint_effort = ObsTerm(func=mdp.joint_effort, scale=0.01, clip=(-100, 100))
@@ -353,6 +359,35 @@ class RewardsCfg:
     #           stand_still_scale 5.0, velocity_threshold 0.3
     #
     # (여기에 작성)
+    base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
+    base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+    base_height = RewTerm(
+        func=mdp.base_height_l2,
+        weight=-1.0,
+        params={
+            "target_height": 0.42,
+            "sensor_cfg": SceneEntityCfg("height_scanner"),
+        },
+    )
+    joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-1e-5)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7 * 0.5 * 0.5)
+    joint_torques = RewTerm(func=mdp.joint_torques_l2, weight=-1e-5 * 0.5)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.01 * 0.8)
+    action_smoothness = RewTerm(func=mdp.action_smoothness_l2, weight=-0.01 * 0.5)
+    dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-10.0)
+    energy = RewTerm(func=mdp.energy, weight=-2e-5 * 0.5)
+
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-0.01)
+
+    joint_pos = RewTerm(
+        func=mdp.joint_position_penalty_command_aware,
+        weight=-0.05,
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
+            "stand_still_scale": 5.0,
+            "velocity_threshold": 0.3,
+        },
+    )
 
     # 261119 hw: w2 실습
     # [w2 목 | 예시] undesired_contacts 등록 (풀이 예시, 그대로 써도 됨)

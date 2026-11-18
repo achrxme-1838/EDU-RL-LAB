@@ -21,7 +21,7 @@ def action_rate_l2(env: ManagerBasedRLEnv) -> torch.Tensor:
     # - 출력: (num_envs,)
     # - 재료: env.action_manager.action (이번 action), env.action_manager.prev_action (직전 action)
     # - 로봇을 가져올 필요 없음. 한 줄로 끝남
-    raise NotImplementedError("w2 수 | 기본-5: action_rate_l2 미작성")
+    return torch.sum(torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1)
 
 
 def action_smoothness_l2(
@@ -35,7 +35,8 @@ def action_smoothness_l2(
     # - 출력: (num_envs,)
     # - action term 꺼내기: env.action_manager.get_term(action_name)
     #   - 이 term(JointPositionActionWithHistory)이 raw_actions, prev_actions, prev_prev_actions를 가짐
-    raise NotImplementedError("w2 수 | 중간-2: action_smoothness_l2 미작성")
+    action = env.action_manager.get_term(action_name)
+    return torch.sum(torch.square(action.raw_actions - 2 * action.prev_actions + action.prev_prev_actions), dim=1)
 
 
 def is_terminated(env: ManagerBasedRLEnv) -> torch.Tensor:

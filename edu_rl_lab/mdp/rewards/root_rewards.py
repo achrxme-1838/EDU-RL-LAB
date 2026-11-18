@@ -41,7 +41,9 @@ def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntit
     # 2. 몸체 각속도(body frame)의 x, y 성분 → [:, :2]
     # 3. 제곱한 뒤 성분끼리 더하기 → torch.sum(..., dim=1)
     #    - dim=1을 빼면 env까지 모두 더해져 숫자 하나가 됨
-    raise NotImplementedError("w2 수 | 기본-2: ang_vel_xy_l2 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return torch.sum(torch.square(asset.data.root_ang_vel_b[:, :2]), dim=1)
 
 
 def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -56,7 +58,9 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
     # - 출력: (num_envs,)
     # - 똑바로 서 있으면 g = (0, 0, -1)이라 xy 성분이 0
     # - 형태는 기본-2와 같음. 꺼내는 필드만 다름
-    raise NotImplementedError("w2 수 | 기본-3: flat_orientation_l2 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return torch.sum(torch.square(asset.data.projected_gravity_b[:, :2]), dim=1)
 
 
 def _mean_finite_hit_height(sensor: RayCaster) -> torch.Tensor:
@@ -97,4 +101,12 @@ def base_height_l2(
     # - 재료: env.scene[sensor_cfg.name] (RayCaster), asset.data.root_pos_w (world frame 위치)
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
-    raise NotImplementedError("w2 수 | 중간-3: base_height_l2 미작성")
+    if sensor_cfg is not None:
+        sensor: RayCaster = env.scene[sensor_cfg.name]
+        # Adjust the target height using the sensor data (ignoring missed/inf rays)
+        adjusted_target_height = target_height + _mean_finite_hit_height(sensor)
+    else:
+        # Use the provided target height directly for flat terrain
+        adjusted_target_height = target_height
+    # Compute the L2 squared penalty
+    return torch.square(asset.data.root_pos_w[:, 2] - adjusted_target_height)
