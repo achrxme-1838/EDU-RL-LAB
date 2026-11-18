@@ -24,7 +24,18 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
 
     The provided offset (Defaults to 0.5) is subtracted from the returned values.
     """
+    # 261119 hw: w2 실습
+    # [w2 목 | 기본-2] 주변 지형 높이 (critic 전용)
+    #
+    # - 역할: 몸 아래 1.6 m × 1.0 m 격자(0.1 m 간격, 17 × 11 = 187점)의 지형 높이
+    # - 출력: (num_envs, 187)
+    # - 수식: 센서 높이 - 광선이 닿은 점의 높이 - offset
+    #
+    # 1. 센서는 아래 줄에서 이미 가져옴 (RayCaster)
+    # 2. 센서 높이: sensor.data.pos_w 의 z 성분, 모양 (num_envs,)
+    #    - 187점과 빼려면 둘째 축을 하나 만들어야 함 (unsqueeze)
+    # 3. 닿은 점: sensor.data.ray_hits_w, 모양 (num_envs, 187, 3). z는 마지막 축의 2번
+    # 4. 위 함수 height_scan_finite가 이 함수를 부르고, 안 닿은 광선(inf)을 0으로 바꿈 (제공)
     # extract the used quantities (to enable type-hinting)
     sensor: RayCaster = env.scene.sensors[sensor_cfg.name]
-    # height scan: height = sensor_height - hit_point_z - offset
-    return sensor.data.pos_w[:, 2].unsqueeze(1) - sensor.data.ray_hits_w[..., 2] - offset
+    raise NotImplementedError("w2 목 | 기본-2: height_scan 미작성")

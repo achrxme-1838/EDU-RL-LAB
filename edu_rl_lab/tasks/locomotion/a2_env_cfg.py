@@ -172,12 +172,24 @@ class EventCfg:
         },
     )
 
-    push_robot = EventTerm(
-        func=mdp.push_by_setting_velocity,
-        mode="interval",
-        interval_range_s=(5.0, 10.0),
-        params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
-    )
+    # 261119 hw: w2 실습
+    # [w2 목 | 기본-3] push_robot 등록 (함수 mdp.push_by_setting_velocity는 제공)
+    #
+    # - 형식: 위 EventTerm들과 같음. 이름 push_robot
+    # - mode: "startup" = 시작 때 한 번, "reset" = 에피소드마다, "interval" = 정해진 시간 간격마다
+    # - 이 항목: mode "interval", interval_range_s=(5.0, 10.0)
+    #   params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}}  (몸체 속도를 갑자기 바꿔 미는 효과)
+    #
+    # (여기에 작성)
+
+    # 261119 hw: w2 실습
+    # [w2 목 | 중간-4] motor DR 등록 (함수는 randomize_events.py의 randomize_actuator_gains)
+    #
+    # - 이름 actuator_gains, mode "reset" (에피소드마다 새로 뽑음)
+    # - params: asset_cfg SceneEntityCfg("robot")
+    #           stiffness_range, damping_range, strength_range 모두 (0.9, 1.1)
+    #
+    # (여기에 작성)
 
 
 @configclass
@@ -223,15 +235,28 @@ class ObservationsCfg:
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100), noise=Unoise(n_min=-0.2, n_max=0.2))
-        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100), noise=Unoise(n_min=-0.05, n_max=0.05))
-        velocity_commands = ObsTerm(
-            func=mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}
-        )
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100), noise=Unoise(n_min=-0.01, n_max=0.01))
-        joint_vel_rel = ObsTerm(
-            func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100), noise=Unoise(n_min=-1.5, n_max=1.5)
-        )
+        # 261119 hw: w2 실습
+        # [w2 화 | 기본-5] policy obs 등록
+        #
+        # - 형식: 이름 = ObsTerm(func=mdp.함수, scale=..., clip=(-100, 100))
+        # - 순서: base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, last_action
+        #         이 순서가 곧 신경망 입력 순서. deploy.yaml과 같아야 함
+        # - scale: base_ang_vel 0.2, joint_vel_rel 0.05, 나머지는 없음
+        # - 아래 __post_init__의 history_length = 5: 항목마다 최근 5개를 이어 붙임 → 42 × 5 = 210
+        #
+        # (여기에 작성)
+        #
+        # [w2 목 | 기본-1] obs noise (policy만)
+        # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 덧셈 잡음
+        #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
+        # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
+        # - 잡음은 __post_init__의 enable_corruption = True일 때만 적용됨
+        #
+        # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리
+        # - func mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}, scale 없음
+        # - 입력 차원 45 × 5 = 225. deploy.yaml의 observations 순서도 같이 맞출 것
+        #
+        # [w2 화 | 예시] last_action 등록 (풀이 예시). 함수는 mdp_observations.py
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
         def __post_init__(self):
@@ -246,22 +271,23 @@ class ObservationsCfg:
     class CriticCfg(ObsGroup):
         """Observations for critic group."""
 
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, clip=(-100, 100))
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100))
-        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
-        velocity_commands = ObsTerm(
-            func=mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}
-        )
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
-        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
-        joint_effort = ObsTerm(func=mdp.joint_effort, scale=0.01, clip=(-100, 100))
+        # 261119 hw: w2 실습
+        # [w2 화 | 중간-2] critic obs 등록
+        #
+        # - 순서: base_lin_vel, base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, joint_effort, last_action
+        # - policy와 같은 항목은 같은 scale, clip. noise는 넣지 않음
+        # - base_lin_vel: scale 없음 / joint_effort: scale 0.01
+        # - critic은 history 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
+        #
+        # (여기에 작성)
+        #
+        # [w2 수 | 기본-1] critic의 velocity_commands도 projected_gravity 바로 다음 자리 (57 → 60)
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
-        height_scan = ObsTerm(
-            func=mdp.height_scan_finite,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
-            clip=(-1.0, 5.0),
-        )
+        # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247)
+        # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 광선을 0으로 바꾸는 함수, 제공)
+        # - params={"sensor_cfg": SceneEntityCfg("height_scanner")}, clip=(-1.0, 5.0)
+        # - 여러 줄로 써도 됨. 괄호 안에서는 줄을 바꿔도 이어진 한 줄로 읽힘
 
         def __post_init__(self):
             self.concatenate_terms = True
@@ -273,95 +299,77 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    track_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    )
+    # 261119 hw: w2 실습
+    # [w2 화 | 도전] track_lin_vel_xy 등록 (함수는 tracking_rewards.py의 track_lin_vel_xy_exp)
+    #
+    # - 아래 track_ang_vel_z(풀이 예시)와 같은 형태
+    # - weight 1.0, params command_name "base_velocity", std math.sqrt(0.25)
+    # - 이름은 반드시 track_lin_vel_xy (curriculum lin_vel_cmd_levels가 이 이름으로 찾음)
+    #
+    # (여기에 작성)
+    #
+    # [w2 화 | 예시] track_ang_vel_z 등록 (풀이 예시)
     track_ang_vel_z = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
-    base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
-    base_height = RewTerm(
-        func=mdp.base_height_l2,
-        weight=-1.0,
-        params={
-            "target_height": 0.42,
-            "sensor_cfg": SceneEntityCfg("height_scanner"),
-        },
-    )
-    joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-1e-5)
-    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7 * 0.5 * 0.5)
-    joint_torques = RewTerm(func=mdp.joint_torques_l2, weight=-1e-5 * 0.5)
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.01 * 0.8)
-    action_smoothness = RewTerm(func=mdp.action_smoothness_l2, weight=-0.01 * 0.5)
-    dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-10.0)
-    energy = RewTerm(func=mdp.energy, weight=-2e-5 * 0.5)
+    # 261119 hw: w2 실습
+    # [w2 수 | 기본-6] 몸체·관절·action 벌점 등록 (weight가 음수 = 벌점)
+    #
+    # - 예시 (그대로 써도 됨): base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
+    # - 나머지는 같은 형식, params 없음
+    #   | 이름                  | func                     | weight              |
+    #   | base_angular_velocity | mdp.ang_vel_xy_l2        | -0.05               |
+    #   | joint_vel             | mdp.joint_vel_l2         | -1e-5               |
+    #   | joint_acc             | mdp.joint_acc_l2         | -2.5e-7 * 0.5 * 0.5 |
+    #   | joint_torques         | mdp.joint_torques_l2     | -1e-5 * 0.5         |
+    #   | action_rate           | mdp.action_rate_l2       | -0.01 * 0.8         |
+    #   | flat_orientation_l2   | mdp.flat_orientation_l2  | -0.01               |
+    #
+    # [w2 수 | 중간-4] params가 있는 벌점과 나머지 등록
+    #   | 이름              | func                      | weight      | params                                              |
+    #   | base_height       | mdp.base_height_l2        | -1.0        | target_height 0.42, sensor_cfg = 센서 height_scanner |
+    #   | action_smoothness | mdp.action_smoothness_l2  | -0.01 * 0.5 | 없음                                                |
+    #   | dof_pos_limits    | mdp.joint_pos_limits      | -10.0       | 없음                                                |
+    #   | energy            | mdp.energy                | -2e-5 * 0.5 | 없음                                                |
+    # - params 형식: params={"키": 값, ...}. 센서·로봇 지정은 SceneEntityCfg("이름")
+    #
+    # [w2 수 | 도전] joint_pos 등록 (함수 joint_position_penalty_command_aware도 직접 작성)
+    # - weight -0.05
+    # - params: asset_cfg = 로봇 전체 관절 SceneEntityCfg("robot", joint_names=".*")
+    #           stand_still_scale 5.0, velocity_threshold 0.3
+    #
+    # (여기에 작성)
 
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-0.01)
-
-    joint_pos = RewTerm(
-        func=mdp.joint_position_penalty_command_aware,
-        weight=-0.05,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
-            "stand_still_scale": 5.0,
-            "velocity_threshold": 0.3,
-        },
-    )
-
-    feet_air_time = RewTerm(
-        func=mdp.feet_air_time,
-        weight=0.5,
-        params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
-            "command_name": "base_velocity",
-            "threshold": 0.5,
-        },
-    )
-    air_time_variance = RewTerm(
-        func=mdp.air_time_variance_penalty,
-        weight=-0.2,
-        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot")},
-    )
-
-    feet_slide = RewTerm(
-        func=mdp.feet_slide,
-        weight=-0.1,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_foot"),
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
-        },
-    )
-
-    feet_contact_forces = RewTerm(
-        func=mdp.contact_forces,
-        weight=-1e-5,
-        params={
-            "threshold": 200.0,
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"),
-        },
-    )
-
-    feet_clearance = RewTerm(
-        func=mdp.foot_clearance_reward,
-        weight=0.5,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_foot"),
-            "target_height": 0.25,
-            "std": 0.5,
-            "tanh_mult": 2.0,
-        },
-    )
-
-    undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts,
-        weight=-2.0,
-        params={
-            "threshold": 1,
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_hip", ".*_thigh", ".*_calf"]),
-        },
-    )
+    # 261119 hw: w2 실습
+    # [w2 목 | 예시] undesired_contacts 등록 (풀이 예시, 그대로 써도 됨)
+    #     undesired_contacts = RewTerm(
+    #         func=mdp.undesired_contacts,
+    #         weight=-2.0,
+    #         params={
+    #             "threshold": 1,
+    #             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_hip", ".*_thigh", ".*_calf"]),
+    #         },
+    #     )
+    # - body_names는 정규식. ".*_hip" = 이름이 _hip으로 끝나는 모든 body (FL_hip, FR_hip, RL_hip, RR_hip)
+    #
+    # [w2 목 | 기본-4] feet_contact_forces 등록
+    # - func mdp.contact_forces, weight -1e-5
+    # - params: threshold 200.0, sensor_cfg = contact_forces 센서의 네 발
+    #   (발 body 이름: FL_foot, FR_foot, RL_foot, RR_foot)
+    #
+    # [w2 목 | 중간-3] 발 항목 등록 (발 = 위 예시처럼 정규식 하나로)
+    #   | 이름              | func                          | weight | params                                                 |
+    #   | air_time_variance | mdp.air_time_variance_penalty | -0.2   | sensor_cfg (접촉 센서, 발)                             |
+    #   | feet_slide        | mdp.feet_slide                | -0.1   | asset_cfg (로봇, 발), sensor_cfg (접촉 센서, 발)       |
+    #   | feet_clearance    | mdp.foot_clearance_reward     | 0.5    | asset_cfg (로봇, 발), target_height 0.25, std 0.5, tanh_mult 2.0 |
+    # - 로봇의 body를 고를 때도 SceneEntityCfg("robot", body_names=...)
+    #
+    # [w2 목 | 도전] feet_air_time 등록 (함수 feet_air_time도 직접 작성)
+    # - weight 0.5 (양수 = 상)
+    # - params: sensor_cfg (접촉 센서, 발), command_name "base_velocity", threshold 0.5
+    #
+    # (여기에 작성)
 
 
 @configclass

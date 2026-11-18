@@ -25,15 +25,18 @@ def feet_air_time(
 
     If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
     """
-    # extract the used quantities (to enable type-hinting)
-    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    # compute the reward
-    first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
-    last_air_time = contact_sensor.data.last_air_time[:, sensor_cfg.body_ids]
-    reward = torch.sum((last_air_time - threshold) * first_contact, dim=1)
-    # no reward for zero command
-    reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
-    return reward
+    # 261119 hw: w2 실습
+    # [w2 목 | 도전] 발 체공 시간 reward
+    #
+    # - 수식: sum_발 (last_air_time - threshold) × (이번 step에 막 착지했는가 0/1)
+    #         그리고 command xy 크기가 0.1 이하면 0
+    # - 출력: (num_envs,). 음수가 될 수 있음 (threshold보다 짧게 뜨면)
+    # - 재료 (모두 접촉 센서 env.scene.sensors[sensor_cfg.name]에 있음)
+    #   - 막 착지한 발: 센서의 compute_first_contact(env.step_dt) 메서드
+    #   - 직전 체공 시간: 센서 data의 last_air_time
+    #   - 둘 다 발만 고르기: [:, sensor_cfg.body_ids]
+    # - 정지 명령 mask: env.command_manager.get_command(command_name)의 앞 두 성분 크기
+    raise NotImplementedError("w2 목 | 도전: feet_air_time 미작성")
 
 
 def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -43,19 +46,26 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     norm of the linear velocity of the feet multiplied by a binary contact sensor. This ensures that the
     agent is penalized only when the feet are in contact with the ground.
     """
-    # Penalize feet sliding
-    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
-    contacts = contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :].norm(dim=-1).max(dim=1)[0] > 1.0
-    asset = env.scene[asset_cfg.name]
-
-    body_vel = asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2]
-    reward = torch.sum(body_vel.norm(dim=-1) * contacts, dim=1)
-    return reward
+    # 261119 hw: w2 실습
+    # [w2 목 | 중간-1] 발 미끄러짐 벌점
+    #
+    # - 수식: sum_발 |v_발,xy| × (닿아 있는가 0/1)
+    # - 출력: (num_envs,)
+    # - 닿아 있는가: contact_rewards.py의 undesired_contacts(목 예시)와 같은 방법, threshold 1.0
+    #   - 센서는 sensor_cfg, 발 선택은 sensor_cfg.body_ids
+    # - 발 속도: env.scene[asset_cfg.name].data.body_lin_vel_w, 발 선택은 asset_cfg.body_ids, xy는 [..., :2]
+    #   - 센서와 로봇은 서로 다른 객체. body_ids도 각자의 것을 씀
+    raise NotImplementedError("w2 목 | 중간-1: feet_slide 미작성")
 
 
 # The following project terms are licensed under Apache-2.0; see README.md and LICENCE.
 def air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize variance in the amount of time each foot spends in the air/on the ground relative to each other"""
+    # 261119 hw: w2 실습
+    # [w2 목 | 제공] 네 발 체공·접지 시간의 고르기 (함수는 제공, 등록만 작성)
+    #
+    # - 네 발의 last_air_time, last_contact_time 분산. 0.5초에서 자름
+    # - 한 발만 오래 들거나 오래 딛으면 커짐
     # extract the used quantities (to enable type-hinting)
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     if contact_sensor.cfg.track_air_time is False:

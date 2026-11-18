@@ -19,20 +19,35 @@ def track_lin_vel_xy_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     """Reward tracking of linear velocity commands (xy axes) using exponential kernel."""
-    # extract the used quantities (to enable type-hinting)
-    asset: RigidObject = env.scene[asset_cfg.name]
-    # compute the error
-    lin_vel_error = torch.sum(
-        torch.square(env.command_manager.get_command(command_name)[:, :2] - asset.data.root_lin_vel_b[:, :2]),
-        dim=1,
-    )
-    return torch.exp(-lin_vel_error / std**2)
+    # 261119 hw: w2 실습
+    # [w2 화 | 도전] 선속도 추종 reward (x, y 2축)
+    #
+    # - 수식: exp( -( (cmd_x - v_x)^2 + (cmd_y - v_y)^2 ) / std^2 )
+    # - 출력: (num_envs,), 0 초과 1 이하. 명령과 같은 속도면 1
+    # - 아래 track_ang_vel_z_exp(풀이 예시, 1축)를 xy 2축으로 넓히기
+    #   - command의 앞 두 성분, 몸체 선속도(body frame)의 앞 두 성분
+    #   - 성분별 제곱을 더할 때 축 지정 (dim=1)
+    # - std가 클수록 오차를 너그럽게 봄
+    # - 이 항목이 없으면 로봇이 걸을 이유가 없음
+    raise NotImplementedError("w2 화 | 도전: track_lin_vel_xy_exp 미작성")
 
 
 def track_ang_vel_z_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     """Reward tracking of angular velocity commands (yaw) using exponential kernel."""
+    # 261119 hw: w2 실습
+    # [w2 화 | 예시] 회전 속도 추종 reward (풀이 예시)
+    #
+    # - 수식: exp( -(cmd_wz - w_z)^2 / std^2 )
+    # - 출력: (num_envs,), 0 초과 1 이하
+    #
+    # 1. 로봇 가져오기
+    # 2. 오차 = (command의 z 회전 성분 - 몸체 각속도의 z 성분)^2
+    #    - command: env.command_manager.get_command(command_name), 모양 (num_envs, 3) = (vx, vy, wz)
+    #    - 몸체 각속도: asset.data.root_ang_vel_b, 모양 (num_envs, 3)
+    #    - [:, 2] = z 성분
+    # 3. exp 커널: 오차 0이면 1, 오차가 커질수록 0에 가까워짐
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     # compute the error
