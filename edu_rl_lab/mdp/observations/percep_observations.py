@@ -32,7 +32,8 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
     # - 수식: 센서 높이 - 광선이 닿은 점의 높이 - offset
     #
     # 1. 센서는 아래 줄에서 이미 가져옴 (RayCaster)
-    # 2. 센서 높이: sensor.data.pos_w 의 z 성분, 모양 (num_envs,)
+    # 2. 센서 높이: sensor.data.pos_w 의 z 성분 (pos_w[:, 2]), 모양 (num_envs,)
+    #    - pos_w = 센서가 붙은 몸체(base)의 위치. cfg의 offset (0, 0, 20)은 광선 시작점에만 더해지고 여기에는 없음
     #    - 187점과 빼려면 둘째 축을 하나 만들어야 함 (unsqueeze)
     # 3. 닿은 점: sensor.data.ray_hits_w, 모양 (num_envs, 187, 3). z는 마지막 축의 2번
     # 4. 위 함수 height_scan_finite가 이 함수를 부르고, 안 닿은 광선(inf)을 0으로 바꿈 (제공)

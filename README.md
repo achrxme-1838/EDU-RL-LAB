@@ -26,7 +26,6 @@ edu_rl_lab/
 │   ├── events/                 # randomize, reset, step, event_utils
 │   ├── rewards/                # root, joint, tracking, contact, feet, general
 │   ├── terminations/           # mdp, root, contact
-│   ├── spot/                   # Upstream Spot MDP in a separate namespace
 │   ├── symmetry/anymal.py      # Upstream ANYmal symmetry transforms
 │   └── curriculums.py
 ├── tasks/locomotion/
@@ -60,8 +59,8 @@ source is [Isaac Lab v2.3.0](https://github.com/isaac-sim/IsaacLab/tree/v2.3.0).
 
 The project-specific `energy` and `joint_position_penalty` rewards live in
 `rewards/joint_rewards.py`; `air_time_variance_penalty` lives in
-`rewards/feet_rewards.py`. Upstream Spot implementations with overlapping names
-are kept in the `edu_rl_lab.mdp.spot` namespace. MDP reference implementations for
+`rewards/feet_rewards.py`. The upstream Spot implementations (`edu_rl_lab.mdp.spot`)
+were removed in the week 2 practice branches because no task used them. MDP reference implementations for
 other robots are included. Go2 and A2 have registered environments.
 
 Math utilities live in `utils/maths/maths.py` and use the official
