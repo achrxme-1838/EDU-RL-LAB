@@ -23,7 +23,7 @@ def undesired_contacts(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: Sce
     # - 출력: (num_envs,), 닿은 부위 개수
     #
     # 1. 접촉 센서 가져오기: env.scene.sensors[sensor_cfg.name] (ContactSensor)
-    # 2. 접촉력 기록: net_forces_w_history, 모양 (num_envs, history 3, body 17, xyz 3)
+    # 2. 접촉력 기록: net_forces_w_history, 모양 (num_envs, 이력 3, body 17, xyz 3)
     #    - 고를 부위: [:, :, sensor_cfg.body_ids] (cfg에서 body_names로 지정)
     # 3. 힘의 크기 torch.norm(..., dim=-1) → 최근 3 step 중 최대 torch.max(..., dim=1)[0]
     # 4. threshold보다 크면 닿은 것 → 부위끼리 더하기

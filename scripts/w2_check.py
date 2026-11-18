@@ -58,7 +58,7 @@ FUNCS = [
     ("목 도전", "feet_air_time", "rew", None),
     ("목 중간-4", "randomize_actuator_gains", "event", None),
 ]
-# 등록 항목 (a2_env_cfg.py). policy: 이름, 태그, func, scale, 목요일 noise 범위 / critic: 이름, 태그, func, scale
+# 등록 항목 (a2_env_cfg.py). policy: 이름, 태그, func, scale, 목요일 관측 잡음 범위 / critic: 이름, 태그, func, scale
 POLICY = [
     ("base_ang_vel", "화 기본-5", "base_ang_vel", 0.2, 0.2),
     ("projected_gravity", "화 기본-5", "projected_gravity", None, 0.05),
@@ -152,13 +152,13 @@ def check_registration(cfg):
                 note.append(f"clip {t.clip}")
             want_noise = s[4] if part == "policy" and DAY >= 3 else None
             if want_noise is None and t.noise is not None:
-                note.append("noise가 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
+                note.append("관측 잡음이 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
             elif want_noise is not None:
                 lo, hi = getattr(t.noise, "n_min", None), getattr(t.noise, "n_max", None)
                 if t.noise is None:
-                    note.append("noise 없음")
+                    note.append("관측 잡음 없음")
                 elif lo is None or abs(lo + want_noise) > 1e-9 or abs(hi - want_noise) > 1e-9:
-                    note.append(f"noise 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
+                    note.append(f"관측 잡음 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
                 if note and note[-1].startswith("noise"):
                     tag = "목 기본-1"
             report(part, tag, name, "오류" if note else "통과", "; ".join(note))
@@ -429,7 +429,7 @@ def main():
         if DAY >= 3 and written.get("randomize_actuator_gains"):
             motor_dr()
 
-        # ---- 차원: 등록 항목의 열 수 × history
+        # ---- 차원: 등록 항목의 열 수 × 이력
         cols["height_scan_finite"] = cols.get("height_scan")
         try:
             pdim = sum(cols[fname(t)] for t in pol.values()) * (cfg.observations.policy.history_length or 1)
