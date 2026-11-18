@@ -251,10 +251,14 @@ class ObservationsCfg:
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
         # - 잡음은 __post_init__의 enable_corruption = True일 때만 적용됨
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100))
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
         #
         # [w2 수 | 기본-1] velocity_commands는 projected_gravity 바로 다음 자리
         # - func mdp.generated_commands, clip=(-100, 100), params={"command_name": "base_velocity"}, scale 없음
         # - 입력 차원 45 × 5 = 225. deploy.yaml의 observations 순서도 같이 맞출 것
+        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
+        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
         #
         # [w2 화 | 예시] last_action 등록 (풀이 예시). 함수는 mdp_observations.py
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
@@ -280,8 +284,14 @@ class ObservationsCfg:
         # - critic은 history 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
         #
         # (여기에 작성)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, clip=(-100, 100))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100))
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
         #
         # [w2 수 | 기본-1] critic의 velocity_commands도 projected_gravity 바로 다음 자리 (57 → 60)
+        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, clip=(-100, 100))
+        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, clip=(-100, 100))
+        joint_effort = ObsTerm(func=mdp.joint_effort, scale=0.01, clip=(-100, 100))
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
         # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247)
@@ -307,6 +317,9 @@ class RewardsCfg:
     # - 이름은 반드시 track_lin_vel_xy (curriculum lin_vel_cmd_levels가 이 이름으로 찾음)
     #
     # (여기에 작성)
+    track_lin_vel_xy = RewTerm(
+        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
     #
     # [w2 화 | 예시] track_ang_vel_z 등록 (풀이 예시)
     track_ang_vel_z = RewTerm(

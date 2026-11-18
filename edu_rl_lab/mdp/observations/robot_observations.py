@@ -27,7 +27,9 @@ def base_lin_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
     # - 역할: 몸체가 실제로 움직이는 속도. 실제 로봇에는 이 값을 바로 재는 센서가 없음
     # - 출력: (num_envs, 3), m/s, body frame
     # - 기본-1 base_ang_vel과 같은 형태. 필드 이름은 asset.data에서 직접 찾기
-    raise NotImplementedError("w2 화 | 중간-1: base_lin_vel 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return asset.data.root_lin_vel_b
 
 
 @generic_io_descriptor(
@@ -47,7 +49,9 @@ def base_ang_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
     #    - 위치: asset.data
     #    - 이름 끝 _b = body frame, _w = world frame
     # 3. 그대로 return
-    raise NotImplementedError("w2 화 | 기본-1: base_ang_vel 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return asset.data.root_ang_vel_b
 
 
 @generic_io_descriptor(
@@ -66,7 +70,9 @@ def projected_gravity(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEnt
     #    - 위치: asset.data
     #    - 이름에 gravity가 들어 있고, body frame이므로 끝이 _b
     # 3. 그대로 return
-    raise NotImplementedError("w2 화 | 기본-2: projected_gravity 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return asset.data.projected_gravity_b
 
 
 @generic_io_descriptor(
@@ -92,7 +98,9 @@ def joint_pos_rel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     # 3. 관절 고르기
     #    - 두 텐서 모두 [:, asset_cfg.joint_ids]
     #    - 모양 (num_envs, 관절 수)에서 둘째 축이 관절
-    raise NotImplementedError("w2 화 | 기본-3: joint_pos_rel 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
 
 
 @generic_io_descriptor(
@@ -110,7 +118,9 @@ def joint_vel_rel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     #
     # - 출력: (num_envs, 12), rad/s
     # - 기본-3과 같은 형태. pos 대신 vel
-    raise NotImplementedError("w2 화 | 기본-4: joint_vel_rel 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return asset.data.joint_vel[:, asset_cfg.joint_ids] - asset.data.default_joint_vel[:, asset_cfg.joint_ids]
 
 
 @generic_io_descriptor(
@@ -136,4 +146,6 @@ def joint_effort(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
     # - 위치: asset.data. 이름에 torque가 들어간 필드가 둘 있음
     #         모터 한계로 자르기 전(computed)과 실제로 가한 값 중 뒤의 것
     # - 관절 선택은 기본-3과 같음
-    raise NotImplementedError("w2 화 | 중간-1: joint_effort 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return asset.data.applied_torque[:, asset_cfg.joint_ids]

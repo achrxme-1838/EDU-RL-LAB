@@ -29,7 +29,14 @@ def track_lin_vel_xy_exp(
     #   - 성분별 제곱을 더할 때 축 지정 (dim=1)
     # - std가 클수록 오차를 너그럽게 봄
     # - 이 항목이 없으면 로봇이 걸을 이유가 없음
-    raise NotImplementedError("w2 화 | 도전: track_lin_vel_xy_exp 미작성")
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    # compute the error
+    lin_vel_error = torch.sum(
+        torch.square(env.command_manager.get_command(command_name)[:, :2] - asset.data.root_lin_vel_b[:, :2]),
+        dim=1,
+    )
+    return torch.exp(-lin_vel_error / std**2)
 
 
 def track_ang_vel_z_exp(
