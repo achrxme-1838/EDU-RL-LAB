@@ -155,11 +155,11 @@ def check_registration(cfg):
                 note.append("관측 잡음이 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
             elif want_noise is not None:
                 lo, hi = getattr(t.noise, "n_min", None), getattr(t.noise, "n_max", None)
-                if t.noise is None:
-                    note.append("관측 잡음 없음")
-                elif lo is None or abs(lo + want_noise) > 1e-9 or abs(hi - want_noise) > 1e-9:
-                    note.append(f"관측 잡음 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
-                if note and note[-1].startswith("noise"):
+                # 261119 hw: w2 실습 점검 태그
+                # 관측 잡음 오류는 출력 문구가 아니라 조건으로 판단 (문구를 바꿔도 태그가 "목 기본-1"로 나오게)
+                noise_bad = t.noise is None or lo is None or abs(lo + want_noise) > 1e-9 or abs(hi - want_noise) > 1e-9
+                if noise_bad:
+                    note.append("관측 잡음 없음" if t.noise is None else f"관측 잡음 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
                     tag = "목 기본-1"
             report(part, tag, name, "오류" if note else "통과", "; ".join(note))
         names = [s[0] for s in want]
