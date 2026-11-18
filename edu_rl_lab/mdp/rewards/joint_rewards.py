@@ -109,11 +109,11 @@ def joint_position_penalty(
 
 def joint_deviation_l1(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""
-    # 261119 hw: w2 실습
-    # 2주차 실습에서 쓰지 않는 함수. 화요일 기본-3 joint_pos_rel의 정답과 거의 같아 본문을 가림
-    # 원래 본문은 w2_result_tue부터 돌아옴
-    #
-    raise NotImplementedError("2주차 실습에서 쓰지 않는 함수")
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    return torch.sum(torch.abs(angle), dim=1)
 
 
 def stand_still_joint_deviation_l1(
