@@ -8,7 +8,7 @@ from .ppo_cfg import Go2PPORunnerCfg, PolicyCfg, PPOCfg
 @configclass
 class A2PPORunnerCfg(Go2PPORunnerCfg):
     num_steps_per_env: int = 24
-    max_iterations: int = 10001
+    max_iterations: int = 5000  # 261119 hw: w2 실습 수업용 학습 길이 (정답 기준 10001)
     save_interval: int = 500
     experiment_name: str = "a2_base_rl"
     policy: PolicyCfg = PolicyCfg(
