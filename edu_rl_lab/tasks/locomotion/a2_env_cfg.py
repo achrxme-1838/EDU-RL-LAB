@@ -574,3 +574,11 @@ class A2PlayEnvCfg(A2EnvCfg):
         self.scene.terrain.terrain_generator.num_rows = 10
         self.scene.terrain.terrain_generator.num_cols = 6
         self.commands.base_velocity.ranges = self.commands.base_velocity.limit_ranges.copy()
+        # 261119 hw: w2 실습 재생 카메라
+        # - env 0 로봇을 따라감 (기본값은 world 원점 고정이라 --video 영상에 로봇이 안 보임)
+        # - eye, lookat은 로봇 몸통 기준 위치 (m)
+        self.viewer.origin_type = "asset_root"
+        self.viewer.asset_name = "robot"
+        self.viewer.env_index = 0
+        self.viewer.eye = (2.5, 2.5, 1.5)
+        self.viewer.lookat = (0.0, 0.0, 0.0)
