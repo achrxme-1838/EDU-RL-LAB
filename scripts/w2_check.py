@@ -58,7 +58,7 @@ FUNCS = [
     ("목 도전", "feet_air_time", "rew", None),
     ("목 중간-4", "randomize_actuator_gains", "event", None),
 ]
-# 등록 항목 (a2_env_cfg.py). policy: 이름, 태그, func, scale, 목요일 관측 잡음 범위 / critic: 이름, 태그, func, scale
+# 등록 항목 (a2_env_cfg.py). policy: 이름, 태그, func, scale, 목요일 noise 범위 / critic: 이름, 태그, func, scale
 POLICY = [
     ("base_ang_vel", "화 기본-5", "base_ang_vel", 0.2, 0.2),
     ("projected_gravity", "화 기본-5", "projected_gravity", None, 0.05),
@@ -152,14 +152,14 @@ def check_registration(cfg):
                 note.append(f"clip {t.clip}")
             want_noise = s[4] if part == "policy" and DAY >= 3 else None
             if want_noise is None and t.noise is not None:
-                note.append("관측 잡음이 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
+                note.append("noise가 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
             elif want_noise is not None:
                 lo, hi = getattr(t.noise, "n_min", None), getattr(t.noise, "n_max", None)
                 # 261119 hw: w2 실습 점검 태그
-                # 관측 잡음 오류는 출력 문구가 아니라 조건으로 판단 (문구를 바꿔도 태그가 "목 기본-1"로 나오게)
+                # noise 오류는 출력 문구가 아니라 조건으로 판단 (문구를 바꿔도 태그가 "목 기본-1"로 나오게)
                 noise_bad = t.noise is None or lo is None or abs(lo + want_noise) > 1e-9 or abs(hi - want_noise) > 1e-9
                 if noise_bad:
-                    note.append("관측 잡음 없음" if t.noise is None else f"관측 잡음 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
+                    note.append("noise 없음" if t.noise is None else f"noise 범위 ({lo}, {hi}), 힌트 ±{want_noise}")
                     tag = "목 기본-1"
             report(part, tag, name, "오류" if note else "통과", "; ".join(note))
         names = [s[0] for s in want]
@@ -328,7 +328,7 @@ def main():
             set_body_vel(v_b, w_b)
             o, e = safe(name)
             if e or not torch.allclose(o, v_b if name == "base_lin_vel" else w_b, atol=1e-2):
-                return ["써 넣은 base 속도와 다름. 선속도/각속도, base 좌표계(_b)인지 확인"]
+                return ["써 넣은 base 속도와 다름. lin vel/ang vel, base 좌표계(_b)인지 확인"]
         elif name == "generated_commands":
             o, e = safe(name)
             if e or not torch.allclose(o, cmd.command):
@@ -429,7 +429,7 @@ def main():
         if DAY >= 3 and written.get("randomize_actuator_gains"):
             motor_dr()
 
-        # ---- 차원: 등록 항목의 열 수 × 이력
+        # ---- 차원: 등록 항목의 열 수 × history
         cols["height_scan_finite"] = cols.get("height_scan")
         try:
             pdim = sum(cols[fname(t)] for t in pol.values()) * (cfg.observations.policy.history_length or 1)

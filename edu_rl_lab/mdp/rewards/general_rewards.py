@@ -15,11 +15,11 @@ if TYPE_CHECKING:
 def action_rate_l2(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Penalize the rate of change of the actions using L2 squared kernel."""
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-5] action 변화량 패널티
+    # [w2 수 | 기본-5] action rate 패널티
     #
     # - 수식: sum_j (a_t,j - a_t-1,j)^2
     # - 출력: (num_envs,)
-    # - 재료: env.action_manager.action (이번 action), env.action_manager.prev_action (직전 action)
+    # - 재료: env.action_manager.action (이번 action), env.action_manager.prev_action (한 step 전 action)
     # - 로봇을 가져올 필요 없음. 한 줄로 끝남
     return torch.sum(torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1)
 
@@ -29,7 +29,7 @@ def action_smoothness_l2(
 ) -> torch.Tensor:
     """Second difference of raw actions: ||a[t] - 2*a[t-1] + a[t-2]||²."""
     # 261119 hw: w2 실습
-    # [w2 수 | 중간-2] action 2차 차분 패널티
+    # [w2 수 | 중간-2] action smoothness 패널티 (2차 차분)
     #
     # - 수식: sum_j (a_t - 2 a_t-1 + a_t-2)^2
     # - 출력: (num_envs,)

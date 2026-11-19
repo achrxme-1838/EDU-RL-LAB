@@ -25,9 +25,9 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
     The provided offset (Defaults to 0.5) is subtracted from the returned values.
     """
     # 261119 hw: w2 실습
-    # [w2 목 | 기본-2] 주변 지형 높이 (critic 전용)
+    # [w2 목 | 기본-2] height scan (critic 전용)
     #
-    # - 역할: 몸 아래 1.6 m × 1.0 m 격자(0.1 m 간격, 17 × 11 = 187점)의 지형 높이
+    # - 역할: 몸 아래 1.6 m × 1.0 m 격자(0.1 m 간격, 17 × 11 = 187점)의 지면 높이
     # - 출력: (num_envs, 187)
     # - 수식: 센서 높이 - ray가 닿은 점의 높이 - offset
     #
