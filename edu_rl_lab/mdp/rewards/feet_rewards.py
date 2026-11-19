@@ -26,7 +26,7 @@ def feet_air_time(
     If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
     """
     # 261119 hw: w2 실습
-    # [w2 목 | 도전] 발 체공 시간 reward
+    # [w2 목 | 도전] feet air time reward
     #
     # - 수식: sum_발 (last_air_time - threshold) × (이번 step에 막 착지했는가 0/1)
     #         그리고 command xy 크기가 0.1 이하면 0
@@ -34,7 +34,7 @@ def feet_air_time(
     # - 재료 (모두 접촉 센서 env.scene.sensors[sensor_cfg.name]에 있음)
     #   - 막 착지한 발: 센서의 compute_first_contact(env.step_dt) 메서드
     #     돌려주는 값: 모양 (num_envs, 센서 body 수) bool. 이번 step 안에 막 땅에 닿은 body면 True
-    #   - 직전 체공 시간: 센서 data의 last_air_time
+    #   - 떠 있던 시간: 센서 data의 last_air_time
     #     뜻: 마지막으로 떠 있던 구간의 길이(초). 착지하는 순간 정해지고 다음 착지까지 그대로
     #   - bool 텐서에 float 텐서를 곱하면 True = 1, False = 0으로 계산됨
     #   - 둘 다 발만 선택: [:, sensor_cfg.body_ids]
@@ -50,7 +50,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     agent is penalized only when the feet are in contact with the ground.
     """
     # 261119 hw: w2 실습
-    # [w2 목 | 중간-1] 발 미끄러짐 패널티
+    # [w2 목 | 중간-1] feet slide 패널티
     #
     # - 수식: sum_발 |v_발,xy| × (닿아 있는가 0/1)
     # - 출력: (num_envs,)
@@ -65,7 +65,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
 def air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize variance in the amount of time each foot spends in the air/on the ground relative to each other"""
     # 261119 hw: w2 실습
-    # [w2 목 | 제공] 네 발 체공, 접지 시간의 균일도 (함수는 제공, 등록만 작성)
+    # [w2 목 | 제공] air time variance (함수는 제공, 등록만 작성)
     #
     # - 네 발의 last_air_time, last_contact_time 분산. 0.5초에서 자름
     # - 한 발만 오래 들거나 오래 딛으면 커짐

@@ -21,7 +21,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
     entire action tensor is returned.
     """
     # 261119 hw: w2 실습
-    # [w2 화 | 예시] 직전 action (풀이 예시)
+    # [w2 화 | 예시] last action (풀이 예시)
     #
     # - 역할: 정책이 바로 전에 낸 출력. 다음 출력을 부드럽게 잇는 데 씀
     # - 출력: (num_envs, 12), 관절 12개
@@ -30,7 +30,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
     #    - action은 env.action_manager가 가지고 있음
     # 2. 그대로 return
     #
-    # - 흐름: 함수 → a2_env_cfg.py의 ObsTerm 등록 → 신경망 입력 12칸 × 이력 5
+    # - 흐름: 함수 → a2_env_cfg.py의 ObsTerm 등록 → 신경망 입력 12칸 × history 5
     if action_name is None:
         return env.action_manager.action
     else:
@@ -41,7 +41,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
 def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) -> torch.Tensor:
     """The generated command from command term in the command manager with the given name."""
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-1] 속도 명령
+    # [w2 수 | 기본-1] velocity command
     #
     # - 역할: 조이스틱이 주는 목표 속도 (vx, vy, wz)
     # - 출력: (num_envs, 3)

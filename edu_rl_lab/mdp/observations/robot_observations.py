@@ -22,7 +22,7 @@ from isaaclab.envs.utils.io_descriptors import (
 def base_lin_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Root linear velocity in the asset's root frame."""
     # 261119 hw: w2 실습
-    # [w2 화 | 중간-1] base 선속도 (critic 전용)
+    # [w2 화 | 중간-1] base lin vel (critic 전용)
     #
     # - 역할: base가 실제로 움직이는 속도. 실제 로봇에는 이 값을 바로 재는 센서가 없음
     # - 출력: (num_envs, 3), m/s, base 좌표계
@@ -38,14 +38,14 @@ def base_lin_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
 def base_ang_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Root angular velocity in the asset's root frame."""
     # 261119 hw: w2 실습
-    # [w2 화 | 기본-1] base 각속도
+    # [w2 화 | 기본-1] base ang vel
     #
     # - 역할: IMU 자이로가 재는 값
     # - 출력: (num_envs, 3), rad/s, base 좌표계
     #
     # 1. 로봇 가져오기
     #    - env.scene[asset_cfg.name]
-    # 2. base 각속도 꺼내기
+    # 2. base ang vel 꺼내기
     #    - 위치: asset.data
     #    - 이름 끝 _b = base 좌표계, _w = 월드 좌표계
     # 3. 그대로 return
@@ -60,7 +60,7 @@ def base_ang_vel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
 def projected_gravity(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Gravity projection on the asset's root frame."""
     # 261119 hw: w2 실습
-    # [w2 화 | 기본-2] base 좌표계에서 본 중력 방향
+    # [w2 화 | 기본-2] projected gravity (base 좌표계에서 본 중력 방향)
     #
     # - 역할: 몸이 얼마나 기울었는지. 똑바로 서 있으면 (0, 0, -1)
     # - 출력: (num_envs, 3), 단위 벡터, base 좌표계
@@ -86,7 +86,7 @@ def joint_pos_rel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     Note: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their positions returned.
     """
     # 261119 hw: w2 실습
-    # [w2 화 | 기본-3] 기본 자세 대비 관절 위치
+    # [w2 화 | 기본-3] joint pos (기본 자세 대비)
     #
     # - 역할: 기본 자세(서 있는 자세)에서 각 관절이 얼마나 벗어났는지
     # - 출력: (num_envs, 12), rad
@@ -114,7 +114,7 @@ def joint_vel_rel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     Note: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their velocities returned.
     """
     # 261119 hw: w2 실습
-    # [w2 화 | 기본-4] 기본값 대비 관절 속도
+    # [w2 화 | 기본-4] joint vel (기본값 대비)
     #
     # - 출력: (num_envs, 12), rad/s
     # - 기본-3과 같은 형태. pos 대신 vel
@@ -139,7 +139,7 @@ def joint_effort(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCf
         The joint effort (N or N-m) for joint_names in asset_cfg, shape is [num_env,num_joints].
     """
     # 261119 hw: w2 실습
-    # [w2 화 | 중간-1] 관절 토크 (critic 전용)
+    # [w2 화 | 중간-1] joint effort (critic 전용)
     #
     # - 역할: 모터가 실제로 낸 토크
     # - 출력: (num_envs, 12), Nm
