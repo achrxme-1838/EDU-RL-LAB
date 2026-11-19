@@ -246,11 +246,11 @@ class ObservationsCfg:
         #
         # (여기에 작성)
         #
-        # [w2 목 | 기본-1] 관측 잡음 (policy만, 목요일에 작성)
-        # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 덧셈 잡음
+        # [w2 목 | 기본-1] 관측 noise (policy만, 목요일에 작성)
+        # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 noise
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
-        # - 잡음은 __post_init__의 enable_corruption = True일 때만 적용됨
+        # - noise는 __post_init__의 enable_corruption = True일 때만 적용됨
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, clip=(-100, 100))
         projected_gravity = ObsTerm(func=mdp.projected_gravity, clip=(-100, 100))
         #
@@ -282,9 +282,9 @@ class ObservationsCfg:
         # [w2 화 | 중간-2] critic 관측 등록
         #
         # - 순서: base_lin_vel, base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, joint_effort, last_action
-        # - policy와 같은 항목은 같은 scale, clip. 관측 잡음은 넣지 않음
+        # - policy와 같은 항목은 같은 scale, clip. noise는 넣지 않음
         # - base_lin_vel: scale 없음, clip=(-100, 100) / joint_effort: scale 0.01, clip=(-100, 100)
-        # - critic은 이력 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
+        # - critic은 history 없음 (아래 __post_init__ 참고) → 3+3+3+12+12+12+12 = 57
         #
         # (여기에 작성)
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel, clip=(-100, 100))
@@ -333,7 +333,7 @@ class RewardsCfg:
     )
 
     # 261119 hw: w2 실습
-    # [w2 수 | 기본-6] base, 관절, action 패널티 등록 (weight가 음수면 패널티)
+    # [w2 수 | 기본-6] base, joint, action 패널티 등록 (weight가 음수면 패널티)
     #
     # - 예시 (그대로 써도 됨): base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
     # - 나머지는 같은 형식, params 없음
@@ -406,7 +406,7 @@ class RewardsCfg:
     # - params: threshold 200.0, sensor_cfg = contact_forces 센서의 네 발
     #   (발 body 이름: FL_foot, FR_foot, RL_foot, RR_foot)
     #
-    # [w2 목 | 중간-3] 발 항목 등록 (발 = 위 예시처럼 정규식 하나로)
+    # [w2 목 | 중간-3] feet reward 등록 (발 = 위 예시처럼 정규식 하나로)
     #   | 이름              | func                          | weight | params                                                 |
     #   | air_time_variance | mdp.air_time_variance_penalty | -0.2   | sensor_cfg (접촉 센서, 발)                             |
     #   | feet_slide        | mdp.feet_slide                | -0.1   | asset_cfg (로봇, 발), sensor_cfg (접촉 센서, 발)       |
