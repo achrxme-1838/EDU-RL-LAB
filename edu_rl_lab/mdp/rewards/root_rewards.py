@@ -37,6 +37,15 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
     return torch.sum(torch.square(asset.data.projected_gravity_b[:, :2]), dim=1)
 
 
+# 261013 hw: base_height
+def base_height_l2(
+    env: ManagerBasedRLEnv, target_height: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Penalize base height deviation from the target using L2 squared kernel (flat terrain only)."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return torch.square(asset.data.root_pos_w[:, 2] - target_height)
+
+
 # A2 terms ported from DEX_RL_LAB.
 def _mean_finite_hit_height(sensor: RayCaster) -> torch.Tensor:
     """Per-env mean world-z of ray hits, ignoring missed rays.

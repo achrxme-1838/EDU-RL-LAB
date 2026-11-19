@@ -15,8 +15,10 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
-from isaaclab.sensors import ContactSensorCfg
+# 261014 hw: demo
+from isaaclab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from isaaclab.terrains import TerrainImporterCfg
+from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # noqa: F401
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
@@ -65,7 +67,18 @@ class RobotSceneCfg(InteractiveSceneCfg):
     )
     robot: ArticulationCfg = ROBOT_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
-    contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
+    # 261014 hw: demo (height_scanner is not used in observations)
+    contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True, debug_vis=False
+    )
+    height_scanner = RayCasterCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/base",
+        offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
+        ray_alignment="yaw",
+        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+        debug_vis=False,
+        mesh_prim_paths=["/World/ground"],
+    )
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
         spawn=sim_utils.DomeLightCfg(
@@ -235,6 +248,8 @@ class RewardsCfg:
     energy = RewTerm(func=mdp.energy, weight=-2e-5)
 
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.5)
+    # 261013 hw: base_height
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-1.0, params={"target_height": 0.32})
 
     joint_pos = RewTerm(
         func=mdp.joint_position_penalty,
@@ -318,10 +333,19 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
         self.episode_length_s = 20.0
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
+        # 261014 hw: demo (camera follows the env 0 robot)
+        self.viewer.origin_type = "asset_root"
+        self.viewer.asset_name = "robot"
+        self.viewer.eye = (2.5, 2.5, 1.5)
         self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
         self.scene.contact_forces.update_period = self.sim.dt
+        self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+
+        # 261014 hw: day-4 experiments (uncomment one line; train and play both use it)
+        # self.scene.terrain.terrain_generator = STAIRS_TERRAIN_CFG
+        # self.terminations.base_contact = self.terminations.bad_orientation = None
 
         if getattr(self.curriculum, "terrain_levels", None) is not None:
             if self.scene.terrain.terrain_generator is not None:
@@ -335,6 +359,8 @@ class Go2EnvCfg(ManagerBasedRLEnvCfg):
 class Go2PlayEnvCfg(Go2EnvCfg):
     def __post_init__(self):
         super().__post_init__()
+        # 261014 hw: demo
+        # self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG
         self.scene.num_envs = 32
         self.scene.terrain.terrain_generator.num_rows = 2
         self.scene.terrain.terrain_generator.num_cols = 1
@@ -344,3 +370,61 @@ class Go2PlayEnvCfg(Go2EnvCfg):
         self.curriculum.terrain_levels = None
         self.curriculum.lin_vel_cmd_levels = None
         self.scene.terrain.terrain_generator.curriculum = False
+
+        # 261014 hw: demo (uncomment and change values only; the training cfg above stays unchanged)
+        # self.events.push_robot = EventCfg().push_robot
+        # self.events.push_robot.params["velocity_range"] = {"x": (-1.5, 1.5), "y": (-1.5, 1.5)}
+        # self.events.push_robot.interval_range_s = (2.0, 2.0)
+        # self.events.base_external_force_torque.params["force_range"] = (-20.0, 20.0)
+        # self.events.physics_material.params["static_friction_range"] = (0.1, 0.1)
+        # self.events.physics_material.params["dynamic_friction_range"] = (0.1, 0.1)
+        # self.events.add_base_mass.params["mass_distribution_params"] = (5.0, 5.0)
+        # self.events.reset_robot_joints.params["position_range"] = (0.5, 1.5)
+        # self.terminations.bad_orientation.params["limit_angle"] = 0.05
+        # self.terminations.base_contact = None
+        # self.terminations.bad_orientation = None
+        # self.episode_length_s = 5.0
+        # self.commands.base_velocity.ranges.lin_vel_x = (1.0, 1.0)
+        # self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
+        # self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
+        # self.actions.JointPositionAction.scale = 0.5
+        # self.scene.contact_forces.debug_vis = True
+        # self.scene.height_scanner.debug_vis = True
+        # self.scene.robot.spawn.articulation_props.fix_root_link = True
+        # self.scene.robot.init_state.pos = (0.0, 0.0, 0.8)
+
+        # 261022 hw: day-5 (play only; terrain lines set 5x4 tiles themselves)
+        # self.scene.terrain.terrain_generator = STAIRS_TERRAIN_CFG.replace(num_rows=5, num_cols=4, curriculum=False)
+        # self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG.replace(num_rows=5, num_cols=4, curriculum=False)
+        # self.terminations.base_contact.params["sensor_cfg"] = SceneEntityCfg("contact_forces", body_names=["base", "Head_.*"])
+
+
+# 261014 hw: day-4 stairs terrain (used by the experiment line in Go2EnvCfg)
+STAIRS_TERRAIN_CFG = terrain_gen.TerrainGeneratorCfg(
+    size=(8.0, 8.0),
+    border_width=20.0,
+    num_rows=10,
+    num_cols=20,
+    horizontal_scale=0.1,
+    vertical_scale=0.005,
+    slope_threshold=0.75,
+    use_cache=False,
+    sub_terrains={
+        "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
+            proportion=0.5,
+            step_height_range=(0.05, 0.23),
+            step_width=0.3,
+            platform_width=3.0,
+            border_width=1.0,
+            holes=False,
+        ),
+        "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
+            proportion=0.5,
+            step_height_range=(0.05, 0.23),
+            step_width=0.3,
+            platform_width=3.0,
+            border_width=1.0,
+            holes=False,
+        ),
+    },
+)

@@ -41,7 +41,9 @@ class Go2PPORunnerCfg:
     max_iterations: int = 10000
     save_interval: int = 100
     experiment_name: str = "go2_velocity"
-    logger: str = "tensorboard"
+    # 261013 hw: wandb
+    logger: str = "wandb"  # or "tensorboard"
+    wandb_project: str = "edu_rl_lab"
     clip_actions: float | None = None
     obs_groups: dict[str, list[str]] = {"policy": ["policy"], "critic": ["critic"]}
     policy: PolicyCfg = PolicyCfg()
