@@ -39,7 +39,7 @@ try:
     assert len(cfg.scene.terrain.terrain_generator.sub_terrains) == 7
     assert go2_cfg.observations.policy.history_length in (None, 0)
     assert go2_agent.save_interval == 100
-    assert agent_cfg.max_iterations == 8000 and agent_cfg.save_interval == 500  # 261120 hw: w2 실습 수업용 학습 길이
+    assert agent_cfg.max_iterations == 8000 and agent_cfg.save_interval == 200  # 261120 hw: w2 실습 수업용 학습 길이·저장 간격
 
     cfg.seed = 42
     cfg.scene.num_envs = 8
