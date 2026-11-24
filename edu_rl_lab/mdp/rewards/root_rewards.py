@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize z-axis base linear velocity using L2 squared kernel."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 예시] base z-axis 속도 패널티 (풀이 예시)
     #
     # - 수식: v_z^2
@@ -31,7 +31,7 @@ def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 
 def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize xy-axis base angular velocity using L2 squared kernel."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 기본-2] base roll, pitch ang vel 패널티
     #
     # - 수식: w_x^2 + w_y^2
@@ -51,7 +51,7 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
 
     This is computed by penalizing the xy-components of the projected gravity vector.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 기본-3] flat orientation 패널티
     #
     # - 수식: g_x^2 + g_y^2   (g = 화요일 기본-2의 projected gravity)
@@ -90,7 +90,7 @@ def base_height_l2(
         For flat terrain, target height is in the world frame. For rough terrain,
         sensor readings can adjust the target height to account for the terrain.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 중간-3] base height 패널티
     #
     # - 수식: (base z - 목표 높이)^2

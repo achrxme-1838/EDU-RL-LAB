@@ -22,7 +22,7 @@ def joint_vel_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 
     NOTE: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their joint velocities contribute to the term.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 기본-4] joint vel 패널티 (아래 joint_acc_l2, joint_torques_l2도 같은 형태)
     #
     # - 수식: sum_j joint_vel_j^2
@@ -41,11 +41,11 @@ def joint_acc_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 
     NOTE: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their joint accelerations contribute to the term.
     """
-    # 261119 hw: w2 실습
+    # w2 실습 (261125 hw: 가속도 필드 이름 힌트)
     # [w2 수 | 기본-4] joint acc 패널티
     #
     # - 수식: sum_j joint_acc_j^2
-    # - joint_vel_l2와 같은 형태. asset.data에서 가속도 필드 찾기
+    # - joint_vel_l2와 같은 형태. 가속도 필드: asset.data.joint_acc
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
     return torch.sum(torch.square(asset.data.joint_acc[:, asset_cfg.joint_ids]), dim=1)
@@ -56,7 +56,7 @@ def joint_torques_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
 
     NOTE: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their joint torques contribute to the term.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 기본-4] joint torques 패널티
     #
     # - 수식: sum_j torque_j^2
@@ -71,7 +71,7 @@ def joint_pos_limits(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
 
     This is computed as a sum of the absolute value of the difference between the joint position and the soft limits.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 제공] joint pos limits 패널티 (함수는 제공, 등록만 작성)
     #
     # - soft_joint_pos_limits[..., 0] = 아래 한계, [..., 1] = 위 한계
@@ -91,7 +91,7 @@ def joint_pos_limits(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
 # The following project terms are licensed under Apache-2.0; see README.md and LICENCE.
 def energy(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize the energy used by the robot's joints."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 중간-1] energy 패널티
     #
     # - 수식: sum_j |joint_vel_j| * |torque_j|
@@ -144,7 +144,7 @@ def joint_position_penalty_command_aware(
     Set command_name=None to decide standing solely from measured base XY speed.
     The default preserves the velocity-command behavior of existing RL tasks.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 도전] joint pos 패널티 (서 있을 때 더 세게)
     #
     # - 출력: (num_envs,), 0 이상

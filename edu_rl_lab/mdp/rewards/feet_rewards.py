@@ -25,7 +25,7 @@ def feet_air_time(
 
     If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 도전] feet air time reward
     #
     # - 수식: sum_발 (last_air_time - threshold) × (이번 step에 막 착지했는가 0/1)
@@ -57,7 +57,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     norm of the linear velocity of the feet multiplied by a binary contact sensor. This ensures that the
     agent is penalized only when the feet are in contact with the ground.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 중간-1] feet slide 패널티
     #
     # - 수식: sum_발 |v_발,xy| × (닿아 있는가 0/1)
@@ -79,7 +79,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
 # The following project terms are licensed under Apache-2.0; see README.md and LICENCE.
 def air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize variance in the amount of time each foot spends in the air/on the ground relative to each other"""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 제공] air time variance (함수는 제공, 등록만 작성)
     #
     # - 네 발의 last_air_time, last_contact_time 분산. 0.5초에서 자름

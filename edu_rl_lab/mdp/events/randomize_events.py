@@ -14,7 +14,7 @@ from typing import Literal
 from edu_rl_lab.utils.maths import maths as math_utils
 from isaaclab.managers import EventTermCfg, ManagerTermBase
 from .event_utils import _randomize_prop_by_op, _validate_scale_range
-# 261119 hw: w2 실습 (motor DR)
+# w2 실습 (motor DR)
 from isaaclab.actuators import ImplicitActuator
 
 
@@ -297,7 +297,7 @@ def randomize_rigid_body_com(
     asset.root_physx_view.set_coms(coms, env_ids)
 
 
-# 261119 hw: w2 실습 (motor DR, 정답 기준 브랜치에 없던 함수를 새로 추가)
+# w2 실습 (motor DR, 정답 기준 브랜치에 없던 함수를 새로 추가)
 def randomize_actuator_gains(
     env: ManagerBasedEnv,
     env_ids: torch.Tensor | None,
