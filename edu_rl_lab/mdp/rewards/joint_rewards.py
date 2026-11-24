@@ -39,11 +39,11 @@ def joint_acc_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 
     NOTE: Only the joints configured in :attr:`asset_cfg.joint_ids` will have their joint accelerations contribute to the term.
     """
-    # 261119 hw: w2 실습
+    # 261119 hw: w2 실습 (261125 hw: 가속도 필드 이름 힌트)
     # [w2 수 | 기본-4] joint acc 패널티
     #
     # - 수식: sum_j joint_acc_j^2
-    # - joint_vel_l2와 같은 형태. asset.data에서 가속도 필드 찾기
+    # - joint_vel_l2와 같은 형태. 가속도 필드: asset.data.joint_acc
     raise NotImplementedError("w2 수 | 기본-4: joint_acc_l2 미작성")
 
 

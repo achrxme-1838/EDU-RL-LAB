@@ -40,7 +40,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
 @generic_io_descriptor(dtype=torch.float32, observation_type="Command", on_inspect=[record_shape])
 def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) -> torch.Tensor:
     """The generated command from command term in the command manager with the given name."""
-    # 261119 hw: w2 실습
+    # 261119 hw: w2 실습 (261125 hw: get_term과 구분하는 힌트)
     # [w2 수 | 기본-1] velocity command
     #
     # - 역할: 조이스틱이 주는 목표 속도 (vx, vy, wz)
@@ -49,5 +49,5 @@ def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) 
     # 1. command는 env.command_manager가 가지고 있음
     #    - last_action에서 env.action_manager를 쓴 것과 같은 형태
     # 2. 이름(command_name)으로 command 하나 꺼내기
-    #    - command_manager의 메서드 중 get_으로 시작하는 것
+    #    - 화요일 last_action의 get_term(...)과 같은 모양. 단 command 값을 꺼내는 get_ 메서드
     raise NotImplementedError("w2 수 | 기본-1: generated_commands 미작성")
