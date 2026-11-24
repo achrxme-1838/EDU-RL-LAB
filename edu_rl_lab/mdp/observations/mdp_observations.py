@@ -20,7 +20,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
     The name of the action term for which the action is required. If None, the
     entire action tensor is returned.
     """
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 화 | 예시] last action (풀이 예시)
     #
     # - 역할: 정책이 바로 전에 낸 출력. 다음 출력을 부드럽게 잇는 데 씀
@@ -40,7 +40,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
 @generic_io_descriptor(dtype=torch.float32, observation_type="Command", on_inspect=[record_shape])
 def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) -> torch.Tensor:
     """The generated command from command term in the command manager with the given name."""
-    # 261119 hw: w2 실습 (261125 hw: get_term과 구분하는 힌트)
+    # w2 실습 (261125 hw: get_term과 구분하는 힌트)
     # [w2 수 | 기본-1] velocity command
     #
     # - 역할: 조이스틱이 주는 목표 속도 (vx, vy, wz)
