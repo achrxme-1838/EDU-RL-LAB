@@ -172,7 +172,7 @@ class EventCfg:
         },
     )
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 기본-3] push_robot 등록 (함수 mdp.push_by_setting_velocity는 제공)
     #
     # - 형식: 위 EventTerm들과 같음. 이름 push_robot
@@ -182,7 +182,7 @@ class EventCfg:
     #
     # (여기에 작성)
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 중간-4] motor DR 등록 (함수는 randomize_events.py의 randomize_actuator_gains)
     #
     # - 이름 actuator_gains, mode "reset" (에피소드마다 새로 뽑음)
@@ -235,7 +235,7 @@ class ObservationsCfg:
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-        # 261119 hw: w2 실습
+        # w2 실습
         # [w2 화 | 기본-5] policy 관측 등록
         #
         # - 형식: 이름 = ObsTerm(func=mdp.함수, scale=..., clip=(-100, 100))
@@ -271,7 +271,7 @@ class ObservationsCfg:
     class CriticCfg(ObsGroup):
         """Observations for critic group."""
 
-        # 261119 hw: w2 실습
+        # w2 실습
         # [w2 화 | 중간-2] critic 관측 등록
         #
         # - 순서: base_lin_vel, base_ang_vel, projected_gravity, joint_pos_rel, joint_vel_rel, joint_effort, last_action
@@ -299,7 +299,7 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 화 | 도전] track_lin_vel_xy 등록 (함수는 tracking_rewards.py의 track_lin_vel_xy_exp)
     #
     # - 아래 track_ang_vel_z(풀이 예시)와 같은 형태
@@ -313,7 +313,7 @@ class RewardsCfg:
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 수 | 기본-6] base, joint, action 패널티 등록 (weight가 음수면 패널티)
     #
     # - 예시 (그대로 써도 됨): base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
@@ -341,7 +341,7 @@ class RewardsCfg:
     #
     # (여기에 작성)
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 예시] undesired_contacts 등록 (풀이 예시, 그대로 써도 됨)
     #     undesired_contacts = RewTerm(
     #         func=mdp.undesired_contacts,
@@ -451,7 +451,7 @@ class A2PlayEnvCfg(A2EnvCfg):
         self.scene.terrain.terrain_generator.num_rows = 10
         self.scene.terrain.terrain_generator.num_cols = 6
         self.commands.base_velocity.ranges = self.commands.base_velocity.limit_ranges.copy()
-        # 261119 hw: w2 실습 재생 카메라
+        # w2 실습 재생 카메라
         # - env 0 로봇을 따라감 (기본값은 world 원점 고정이라 --video 영상에 로봇이 안 보임)
         # - eye, lookat은 로봇 몸통 기준 위치 (m)
         self.viewer.origin_type = "asset_root"

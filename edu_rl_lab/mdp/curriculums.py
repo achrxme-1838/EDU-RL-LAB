@@ -58,7 +58,7 @@ def lin_vel_cmd_levels(
     ranges = command_term.cfg.ranges
     limit_ranges = command_term.cfg.limit_ranges
 
-    # 261119 hw: w2 실습
+    # w2 실습
     # w2_edu처럼 track_lin_vel_xy(화요일 도전)가 아직 등록되지 않았으면 범위를 바꾸지 않음
     if reward_term_name not in env.reward_manager.active_terms:
         return torch.tensor(ranges.lin_vel_x[1], device=env.device)

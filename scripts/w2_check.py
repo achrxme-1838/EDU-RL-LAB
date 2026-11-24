@@ -8,7 +8,7 @@
 마지막 줄이 "학습 시작 가능"이면 train.py를 실행해도 됨.
 """
 
-# 261119 hw: w2 실습 (점검 스크립트)
+# w2 실습 (점검 스크립트)
 import argparse
 import copy
 import inspect
@@ -109,7 +109,7 @@ DIM_TAGS = {1: ("화 기본-5", "화 중간-2"), 2: ("수 기본-1", "수 기본
 
 
 def day_of(tag):
-    # 261119 hw: w2 실습 점검 요일 (예시도 그 요일부터. 목 예시 undesired_contacts를 화, 수에 요구하던 것 고침)
+    # w2 실습 점검 요일 (예시도 그 요일부터. 목 예시 undesired_contacts를 화, 수에 요구하던 것 고침)
     return {"화": 1, "수": 2, "목": 3}[tag.split()[0]]
 
 
@@ -155,7 +155,7 @@ def check_registration(cfg):
                 note.append("noise가 있으면 안 됨" + (" (critic)" if part == "critic" else ""))
             elif want_noise is not None:
                 lo, hi = getattr(t.noise, "n_min", None), getattr(t.noise, "n_max", None)
-                # 261119 hw: w2 실습 점검 태그
+                # w2 실습 점검 태그
                 # noise 오류는 출력 문구가 아니라 조건으로 판단 (문구를 바꿔도 태그가 "목 기본-1"로 나오게)
                 noise_bad = t.noise is None or lo is None or abs(lo + want_noise) > 1e-9 or abs(hi - want_noise) > 1e-9
                 if noise_bad:
@@ -474,7 +474,7 @@ if __name__ == "__main__":
         print_table()
         print("점검 중 오류: 위 traceback을 강의자에게 보여 주세요")
     finally:
-        # 261119 hw: w2 실습 종료 코드 (app.close()가 프로세스를 끝내므로 SystemExit을 걸어 둔 채로 닫음)
+        # w2 실습 종료 코드 (app.close()가 프로세스를 끝내므로 SystemExit을 걸어 둔 채로 닫음)
         try:
             sys.exit(0 if ok else 1)
         finally:

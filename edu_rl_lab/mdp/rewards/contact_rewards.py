@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 def undesired_contacts(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize undesired contacts as the number of violations that are above a threshold."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 예시] undesired contacts 패널티 (풀이 예시)
     # - 모양 기호: N = num_envs, H = history 3, B = body 17, K = 고른 부위 수
     # - 출력: (N,), 닿은 부위 개수
@@ -48,7 +48,7 @@ def desired_contacts(env, sensor_cfg: SceneEntityCfg, threshold: float = 1.0) ->
 
 def contact_forces(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize contact forces as the amount of violations of the net contact force."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 기본-4] feet contact force 초과량 패널티
     #
     # - 수식: sum_발 max(0, |F| - threshold)
@@ -63,7 +63,7 @@ def foot_clearance_reward(
     env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, target_height: float, std: float, tanh_mult: float
 ) -> torch.Tensor:
     """Reward the swinging feet for clearing a specified height off the ground"""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 목 | 중간-2] foot clearance reward
     #
     # - 수식: exp( -sum_발 (z_발 - target_height)^2 * tanh(tanh_mult * |v_발,xy|) / std )

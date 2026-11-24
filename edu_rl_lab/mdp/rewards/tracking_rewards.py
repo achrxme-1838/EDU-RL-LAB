@@ -19,7 +19,7 @@ def track_lin_vel_xy_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     """Reward tracking of linear velocity commands (xy axes) using exponential kernel."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 화 | 도전] lin vel xy 추종 reward (x, y 2축)
     #
     # - 수식: exp( -( (cmd_x - v_x)^2 + (cmd_y - v_y)^2 ) / std^2 )
@@ -36,7 +36,7 @@ def track_ang_vel_z_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     """Reward tracking of angular velocity commands (yaw) using exponential kernel."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # [w2 화 | 예시] ang vel z 추종 reward (풀이 예시)
     #
     # - 수식: exp( -(cmd_wz - w_z)^2 / std^2 )
