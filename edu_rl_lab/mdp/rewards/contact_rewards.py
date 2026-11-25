@@ -19,14 +19,14 @@ def undesired_contacts(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: Sce
     """Penalize undesired contacts as the number of violations that are above a threshold."""
     # w2 실습
     # [w2 목 | 예시] undesired contacts 패널티 (풀이 예시)
-    #
-    # - 출력: (num_envs,), 닿은 부위 개수
-    #
+    # - 모양 기호: N = num_envs, H = history 3, B = body 17, K = 고른 부위 수
+    # - 출력: (N,), 닿은 부위 개수
     # 1. 접촉 센서 가져오기: env.scene.sensors[sensor_cfg.name] (ContactSensor)
-    # 2. 접촉력 기록: net_forces_w_history, 모양 (num_envs, history 3, body 17, xyz 3)
-    #    - 고를 부위: [:, :, sensor_cfg.body_ids] (cfg에서 body_names로 지정)
-    # 3. 힘의 크기 torch.norm(..., dim=-1) → 최근 3 step 중 최대 torch.max(..., dim=1)[0]
-    # 4. threshold보다 크면 닿은 것 → 부위끼리 더하기
+    # 2. 접촉력 기록: net_forces_w_history, 모양 (N, H, B, xyz 3)
+    #    - 고를 부위: [:, :, sensor_cfg.body_ids] → (N, H, K, 3) (cfg에서 body_names로 지정)
+    # 3. 힘의 크기 torch.norm(..., dim=-1) → (N, H, K) → H번 중 최대 torch.max(..., dim=1)[0] → (N, K)
+    #    - torch.max(x, dim=축)은 (values, indices) 묶음을 돌려줌. [0] = values (최댓값)
+    # 4. threshold보다 크면 닿은 것 (N, K) → 부위끼리 더하기 sum(dim=1) → (N,)
     # extract the used quantities (to enable type-hinting)
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     # check if contact force is above threshold
