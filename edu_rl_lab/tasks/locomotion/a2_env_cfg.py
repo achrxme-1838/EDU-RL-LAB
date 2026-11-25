@@ -177,15 +177,15 @@ class EventCfg:
     #
     # - 형식: 위 EventTerm들과 같음. 이름 push_robot
     # - mode: "startup" = 시작 때 한 번, "reset" = 에피소드마다, "interval" = 정해진 시간 간격마다
-    # - 이 항목: mode "interval", interval_range_s (5.0, 10.0) ← mode처럼 params 밖에 쓰는 인자
-    # - params: velocity_range = {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}  (base 속도를 갑자기 바꿔 미는 효과)
+    # - 이 항목: mode "interval", interval_range_s=(5.0, 10.0)
+    #   params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}}  (base 속도를 갑자기 바꿔 미는 효과)
     #
     # (여기에 작성)
 
     # w2 실습
     # [w2 목 | 중간-4] motor DR 등록 (함수는 randomize_events.py의 randomize_actuator_gains)
     #
-    # - 형식: 위 push_robot과 같음. 이름 actuator_gains, mode "reset" (에피소드마다 새로 뽑음)
+    # - 이름 actuator_gains, mode "reset" (에피소드마다 새로 뽑음)
     # - params: asset_cfg SceneEntityCfg("robot")
     #           stiffness_range, damping_range, strength_range 모두 (0.9, 1.1)
     #
@@ -247,7 +247,7 @@ class ObservationsCfg:
         # (여기에 작성)
         #
         # [w2 목 | 기본-1] 관측 noise (policy만, 목요일에 작성)
-        # - 아래 ObsTerm 4개의 괄호 안에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 noise
+        # - 아래 관측 4줄의 괄호 안에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 noise
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
         # - noise는 __post_init__의 enable_corruption = True일 때만 적용됨
@@ -285,8 +285,8 @@ class ObservationsCfg:
         last_action = ObsTerm(func=mdp.last_action, clip=(-100, 100))
 
         # [w2 목 | 기본-2] height_scan 등록 (critic 맨 끝, 60 → 247, 목요일에 작성)
-        # - 형식: 위 velocity_commands와 같음. 이름 height_scan, func mdp.height_scan_finite (percep_observations.py)
-        # - params: sensor_cfg = SceneEntityCfg("height_scanner") / clip (-1.0, 5.0)
+        # - 이름 height_scan, func mdp.height_scan_finite (percep_observations.py, 안 닿은 ray를 0으로 바꾸는 함수, 제공)
+        # - params={"sensor_cfg": SceneEntityCfg("height_scanner")}, clip=(-1.0, 5.0)
         # - 여러 줄로 써도 됨. 괄호 안에서는 줄을 바꿔도 이어진 한 줄로 읽힘
 
         def __post_init__(self):
@@ -352,19 +352,18 @@ class RewardsCfg:
     #         },
     #     )
     # - body_names는 정규식. ".*_hip" = 이름이 _hip으로 끝나는 모든 body (FL_hip, FR_hip, RL_hip, RR_hip)
-    # - 주석을 풀면 들여쓰기가 4칸 더 깊어짐 → 위 항목들처럼 4칸으로 맞출 것
     #
-    # [w2 목 | 기본-4] feet_contact_forces 등록 (형식은 위 예시와 같음)
+    # [w2 목 | 기본-4] feet_contact_forces 등록
     # - func mdp.contact_forces, weight -1e-5
     # - params: threshold 200.0, sensor_cfg = contact_forces 센서의 네 발
-    #   (발 body 이름: FL_foot, FR_foot, RL_foot, RR_foot → 정규식 하나로)
+    #   (발 body 이름: FL_foot, FR_foot, RL_foot, RR_foot)
     #
     # [w2 목 | 중간-3] feet reward 등록 (발 = 위 예시처럼 정규식 하나로)
     #   | 이름              | func                          | weight | params                                                 |
     #   | air_time_variance | mdp.air_time_variance_penalty | -0.2   | sensor_cfg (접촉 센서, 발)                             |
     #   | feet_slide        | mdp.feet_slide                | -0.1   | asset_cfg (로봇, 발), sensor_cfg (접촉 센서, 발)       |
     #   | feet_clearance    | mdp.foot_clearance_reward     | 0.5    | asset_cfg (로봇, 발), target_height 0.25, std 0.5, tanh_mult 2.0 |
-    # - SceneEntityCfg(이름, body_names=...): 접촉 센서 이름 "contact_forces", 로봇 이름 "robot"
+    # - 로봇의 body를 고를 때도 SceneEntityCfg("robot", body_names=...)
     #
     # [w2 목 | 도전] feet_air_time 등록 (함수 feet_air_time도 직접 작성)
     # - weight 0.5 (양수 = 상)
