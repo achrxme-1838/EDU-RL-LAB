@@ -320,15 +320,12 @@ def randomize_actuator_gains(
     #   - kp = kp0 × U(stiffness_range) × s
     #   - kd = kd0 × U(damping_range) × s
     #   - 같은 s를 Kp, Kd에 곱하면 PD 토크 전체에 s를 곱한 것과 같음
-    # - 아래 kp0, kd0 (기본 gain, 모양 (len(env_ids), 관절 수))까지는 제공
-    # - 작성할 것: 세 배율 뽑기, actuator.stiffness[env_ids]와 actuator.damping[env_ids]에 써 넣기
-    #   - 인덱싱은 env_ids만: actuator.stiffness[env_ids] = ...  관절 축은 그대로 둠
-    #     actuator.stiffness, actuator.damping은 이미 이 actuator의 관절만 가진 (num_envs, 관절 수) 텐서
-    #     (joint_indices로 다시 고르지 않음. kp0을 만들 때만 asset.data 전체에서 고르려고 씀)
-    #   - 배율의 모양: kp0.shape (env마다, 관절마다 따로 뽑음)
-    #   - 균등분포: math_utils.sample_uniform(하한, 상한, 모양, device=asset.device)
-    #     범위 tuple은 *stiffness_range 처럼 풀어서 넘기면 하한, 상한이 됨
-    #   - 매번 기본값(kp0, kd0)에서 다시 계산. 현재 값에 곱하면 reset마다 누적됨
+    # - 제공: kp0, kd0 (기본 gain, 모양 (len(env_ids), 관절 수)). 아래 raise 자리(for 안)에 작성
+    # - 써 넣을 곳: actuator.stiffness[env_ids], actuator.damping[env_ids]
+    #   - 이미 이 actuator의 관절만 가진 텐서. 관절 축은 joint_indices로 다시 고르지 않음
+    # - 균등분포: math_utils.sample_uniform(하한, 상한, 모양, device=asset.device)
+    #   - 하한, 상한 = range[0], range[1] (*range로 풀어 넘겨도 같음). 모양 = kp0.shape
+    # - 매번 기본값(kp0, kd0)에서 다시 계산. 현재 값에 곱하면 reset마다 누적됨
     asset: Articulation = env.scene[asset_cfg.name]
     if env_ids is None:
         env_ids = torch.arange(env.scene.num_envs, device=asset.device)

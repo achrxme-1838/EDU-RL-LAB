@@ -38,7 +38,7 @@ def feet_air_time(
     #     뜻: 마지막으로 떠 있던 구간의 길이(초). 착지하는 순간 정해지고 다음 착지까지 그대로
     #   - bool 텐서에 float 텐서를 곱하면 True = 1, False = 0으로 계산됨
     #   - 둘 다 발만 선택: [:, sensor_cfg.body_ids]
-    # - 정지 명령 mask: env.command_manager.get_command(command_name)의 앞 두 성분 크기
+    # - 정지 명령 mask: env.command_manager.get_command(command_name)의 앞 두 성분 크기, 모양 (num_envs, 3)
     # extract the used quantities (to enable type-hinting)
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     # compute the reward
@@ -66,6 +66,8 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     #   - 센서는 sensor_cfg, 발 선택은 sensor_cfg.body_ids
     # - 발 속도: env.scene[asset_cfg.name].data.body_lin_vel_w, 발 선택은 asset_cfg.body_ids, xy는 [..., :2]
     #   - 센서와 로봇은 서로 다른 객체. body_ids도 각자의 것을 씀
+    # - 쓸 함수: torch.norm(x, dim=축) = 크기, torch.sum(x, dim=축) = 합 (그 축이 없어짐)
+    # - True/False 텐서 × 숫자 텐서: True = 1, False = 0으로 계산됨
     # Penalize feet sliding
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     contacts = contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :].norm(dim=-1).max(dim=1)[0] > 1.0
