@@ -26,7 +26,6 @@ edu_rl_lab/
 │   ├── events/                 # randomize, reset, step, event_utils
 │   ├── rewards/                # root, joint, tracking, contact, feet, general
 │   ├── terminations/           # mdp, root, contact
-│   ├── spot/                   # Upstream Spot MDP in a separate namespace
 │   ├── symmetry/anymal.py      # Upstream ANYmal symmetry transforms
 │   └── curriculums.py
 ├── tasks/locomotion/
@@ -60,8 +59,8 @@ source is [Isaac Lab v2.3.0](https://github.com/isaac-sim/IsaacLab/tree/v2.3.0).
 
 The project-specific `energy` and `joint_position_penalty` rewards live in
 `rewards/joint_rewards.py`; `air_time_variance_penalty` lives in
-`rewards/feet_rewards.py`. Upstream Spot implementations with overlapping names
-are kept in the `edu_rl_lab.mdp.spot` namespace. MDP reference implementations for
+`rewards/feet_rewards.py`. The upstream Spot implementations (`edu_rl_lab.mdp.spot`)
+were removed in the week 2 practice branches because no task used them. MDP reference implementations for
 other robots are included. Go2 and A2 have registered environments.
 
 Math utilities live in `utils/maths/maths.py` and use the official
@@ -165,7 +164,7 @@ and `agents/a2_ppo_cfg.py`.
   randomization, termination conditions and motor settings. Action smoothness
   uses the current and two previous raw actions, cleared on episode reset.
 - 4096 environments, 0.005 s physics step, decimation 4, 20 s episodes;
-  PPO uses 24 steps/update, 10001 iterations, saves every 500 iterations, and no
+  PPO uses 24 steps/update, 8000 iterations <!-- w2 실습 수업용 학습 길이 (정답 기준 10001) -->, saves every 200 iterations <!-- w2 저장 간격 -->, and no
   observation normalization. The local PPO implementation is retained.
 - Play uses 64 environments and a 10 × 6 terrain grid; noise, pushes and
   curricula remain enabled. It differs from the Go2 play configuration.

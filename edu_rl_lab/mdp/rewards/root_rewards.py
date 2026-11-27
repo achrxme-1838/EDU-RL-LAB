@@ -15,6 +15,15 @@ if TYPE_CHECKING:
 
 def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize z-axis base linear velocity using L2 squared kernel."""
+    # w2 실습
+    # [w2 수 | 예시] base z-axis 속도 패널티 (풀이 예시)
+    #
+    # - 수식: v_z^2
+    # - 출력: (num_envs,), 0 이상. cfg의 음수 weight가 곱해져 패널티가 됨
+    #
+    # 1. 로봇 가져오기
+    # 2. base lin vel(base 좌표계)의 z 성분 [:, 2]
+    # 3. 제곱 (torch.square). 성분이 하나라 더할 필요 없음
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     return torch.square(asset.data.root_lin_vel_b[:, 2])
@@ -22,6 +31,16 @@ def lin_vel_z_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntity
 
 def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize xy-axis base angular velocity using L2 squared kernel."""
+    # w2 실습
+    # [w2 수 | 기본-2] base roll, pitch ang vel 패널티
+    #
+    # - 수식: w_x^2 + w_y^2
+    # - 출력: (num_envs,)
+    #
+    # 1. 로봇 가져오기
+    # 2. base ang vel(base 좌표계)의 x, y 성분 → [:, :2]
+    # 3. 제곱한 뒤 성분끼리 더하기 → torch.sum(..., dim=1)
+    #    - dim=1을 빼면 env까지 모두 더해져 숫자 하나가 됨
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     return torch.sum(torch.square(asset.data.root_ang_vel_b[:, :2]), dim=1)
@@ -32,6 +51,13 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
 
     This is computed by penalizing the xy-components of the projected gravity vector.
     """
+    # w2 실습
+    # [w2 수 | 기본-3] flat orientation 패널티
+    #
+    # - 수식: g_x^2 + g_y^2   (g = 화요일 기본-2의 projected gravity)
+    # - 출력: (num_envs,)
+    # - 똑바로 서 있으면 g = (0, 0, -1)이라 xy 성분이 0
+    # - 형태는 기본-2와 같음. 꺼내는 필드만 다름
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     return torch.sum(torch.square(asset.data.projected_gravity_b[:, :2]), dim=1)
@@ -73,6 +99,15 @@ def base_height_l2(
         For flat terrain, target height is in the world frame. For rough terrain,
         sensor readings can adjust the target height to account for the terrain.
     """
+    # w2 실습
+    # [w2 수 | 중간-3] base height 패널티
+    #
+    # - 수식: (base z - 목표 높이)^2
+    # - 출력: (num_envs,)
+    # - 목표 높이 = target_height + 발밑 지면 높이
+    #   - sensor_cfg가 있으면: 지면 높이 = _mean_finite_hit_height(sensor) (위 함수, 제공)
+    #   - sensor_cfg가 None이면: 평지로 보고 target_height 그대로
+    # - 재료: env.scene[sensor_cfg.name] (RayCaster), asset.data.root_pos_w (월드 좌표계 위치)
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     if sensor_cfg is not None:

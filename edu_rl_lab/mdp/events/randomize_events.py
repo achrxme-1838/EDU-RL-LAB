@@ -14,6 +14,8 @@ from typing import Literal
 from edu_rl_lab.utils.maths import maths as math_utils
 from isaaclab.managers import EventTermCfg, ManagerTermBase
 from .event_utils import _randomize_prop_by_op, _validate_scale_range
+# w2 실습 (motor DR)
+from isaaclab.actuators import ImplicitActuator
 
 
 
@@ -293,3 +295,49 @@ def randomize_rigid_body_com(
 
     # Set the new coms
     asset.root_physx_view.set_coms(coms, env_ids)
+
+
+# w2 실습 (motor DR, 정답 기준 브랜치에 없던 함수를 새로 추가)
+def randomize_actuator_gains(
+    env: ManagerBasedEnv,
+    env_ids: torch.Tensor | None,
+    asset_cfg: SceneEntityCfg,
+    stiffness_range: tuple[float, float],
+    damping_range: tuple[float, float],
+    strength_range: tuple[float, float],
+):
+    """Scale the PD gains of explicit actuators by random factors of their default values.
+
+    ``kp = kp0 * U(stiffness_range) * s`` and ``kd = kd0 * U(damping_range) * s`` with ``s = U(strength_range)``.
+    Using the same ``s`` for both gains scales the whole PD torque (before the effort limit).
+    Gains are recomputed from the defaults on every call, so repeated resets do not accumulate.
+    """
+    # [w2 목 | 중간-4] motor DR: 모터 PD gain과 힘을 env마다 조금씩 바꾸기
+    #
+    # - 왜: 실제 모터의 Kp, Kd, 낼 수 있는 힘은 시뮬레이션 값(Kp 25, Kd 0.5)과 조금씩 다름
+    # - 수식 (모두 기본값 대비 배율, 관절마다 따로 뽑음)
+    #   - s  = U(strength_range)
+    #   - kp = kp0 × U(stiffness_range) × s
+    #   - kd = kd0 × U(damping_range) × s
+    #   - 같은 s를 Kp, Kd에 곱하면 PD 토크 전체에 s를 곱한 것과 같음
+    # - 아래 kp0, kd0 (기본 gain, 모양 (len(env_ids), 관절 수))까지는 제공
+    # - 작성할 것: 세 배율 뽑기, actuator.stiffness[env_ids]와 actuator.damping[env_ids]에 써 넣기
+    #   - 인덱싱은 env_ids만: actuator.stiffness[env_ids] = ...  관절 축은 그대로 둠
+    #     actuator.stiffness, actuator.damping은 이미 이 actuator의 관절만 가진 (num_envs, 관절 수) 텐서
+    #     (joint_indices로 다시 고르지 않음. kp0을 만들 때만 asset.data 전체에서 고르려고 씀)
+    #   - 배율의 모양: kp0.shape (env마다, 관절마다 따로 뽑음)
+    #   - 균등분포: math_utils.sample_uniform(하한, 상한, 모양, device=asset.device)
+    #     범위 tuple은 *stiffness_range 처럼 풀어서 넘기면 하한, 상한이 됨
+    #   - 매번 기본값(kp0, kd0)에서 다시 계산. 현재 값에 곱하면 reset마다 누적됨
+    asset: Articulation = env.scene[asset_cfg.name]
+    if env_ids is None:
+        env_ids = torch.arange(env.scene.num_envs, device=asset.device)
+    for actuator in asset.actuators.values():
+        # implicit actuator의 gain은 물리 엔진 안에 있어 이 방법으로 바뀌지 않음. A2는 DCMotor(explicit)
+        if isinstance(actuator, ImplicitActuator):
+            continue
+        kp0 = asset.data.default_joint_stiffness[env_ids][:, actuator.joint_indices]
+        kd0 = asset.data.default_joint_damping[env_ids][:, actuator.joint_indices]
+        s = math_utils.sample_uniform(*strength_range, kp0.shape, device=asset.device)
+        actuator.stiffness[env_ids] = kp0 * math_utils.sample_uniform(*stiffness_range, kp0.shape, device=asset.device) * s
+        actuator.damping[env_ids] = kd0 * math_utils.sample_uniform(*damping_range, kd0.shape, device=asset.device) * s

@@ -24,6 +24,21 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
 
     The provided offset (Defaults to 0.5) is subtracted from the returned values.
     """
+    # w2 실습
+    # [w2 목 | 기본-2] height scan (critic 전용)
+    #
+    # - 역할: 몸 아래 1.6 m × 1.0 m 격자(0.1 m 간격, 17 × 11 = 187점)의 지면 높이
+    # - 출력: (num_envs, 187)
+    # - 수식: 센서 높이 - ray가 닿은 점의 높이 - offset
+    #
+    # 1. 센서는 아래 줄에서 이미 가져옴 (RayCaster)
+    # 2. 센서 높이: sensor.data.pos_w 의 z 성분 (pos_w[:, 2]), 모양 (num_envs,)
+    #    - pos_w = 센서가 붙은 base의 위치. cfg의 offset (0, 0, 20)은 ray 시작점에만 더해지고 여기에는 없음
+    #    - (num_envs, 187)에서 빼려면 센서 높이에 둘째 축을 추가 (unsqueeze)
+    #      x.unsqueeze(축 번호): 그 자리에 크기 1인 축 추가 (축 번호는 0부터). (N, 1) - (N, 187) → (N, 187)
+    # 3. 닿은 점: sensor.data.ray_hits_w, 모양 (num_envs, 187, 3). z는 마지막 축의 2번
+    #    - 마지막 축 고르기: x[..., 2] ("..." = 앞의 축을 모두 그대로 둠)
+    # 4. 위 함수 height_scan_finite가 이 함수를 부르고, 안 닿은 ray(inf)를 0으로 바꿈 (제공)
     # extract the used quantities (to enable type-hinting)
     sensor: RayCaster = env.scene.sensors[sensor_cfg.name]
     # height scan: height = sensor_height - hit_point_z - offset
