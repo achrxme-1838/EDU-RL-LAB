@@ -40,7 +40,7 @@ def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.T
 @generic_io_descriptor(dtype=torch.float32, observation_type="Command", on_inspect=[record_shape])
 def generated_commands(env: ManagerBasedRLEnv, command_name: str | None = None) -> torch.Tensor:
     """The generated command from command term in the command manager with the given name."""
-    # w2 실습 (261125 hw: get_term과 구분하는 힌트)
+    # w2 실습
     # [w2 수 | 기본-1] velocity command
     #
     # - 역할: 조이스틱이 주는 목표 속도 (vx, vy, wz)

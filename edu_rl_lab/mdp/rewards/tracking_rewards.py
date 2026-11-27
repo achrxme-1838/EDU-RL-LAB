@@ -59,7 +59,7 @@ def track_lin_vel_xy_yaw_frame_exp(
     env, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     """Reward tracking of linear velocity commands (xy axes) in the gravity aligned robot frame using exponential kernel."""
-    # 261119 hw: w2 실습
+    # w2 실습
     # 2주차 실습에서 쓰지 않는 함수. 화요일 도전 track_lin_vel_xy_exp의 정답과 거의 같아 본문을 가림
     # 원래 본문은 w2_result_tue부터 돌아옴
     #
