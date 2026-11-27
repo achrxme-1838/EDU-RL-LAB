@@ -8,8 +8,8 @@ from .ppo_cfg import Go2PPORunnerCfg, PolicyCfg, PPOCfg
 @configclass
 class A2PPORunnerCfg(Go2PPORunnerCfg):
     num_steps_per_env: int = 24
-    max_iterations: int = 8000  # 261120 hw: w2 실습 수업용 학습 길이 (정답 기준 10001)
-    save_interval: int = 200  # 261120 hw: w2 checkpoint 저장 간격 (정답 기준 500)
+    max_iterations: int = 8000  # w2 실습 수업용 학습 길이 (정답 기준 10001)
+    save_interval: int = 200  # w2 checkpoint 저장 간격 (정답 기준 500)
     experiment_name: str = "a2_base_rl"
     policy: PolicyCfg = PolicyCfg(
         init_noise_std=1.0,
