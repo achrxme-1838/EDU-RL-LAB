@@ -35,7 +35,9 @@ def height_scan(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg, offset: float 
     # 2. 센서 높이: sensor.data.pos_w 의 z 성분 (pos_w[:, 2]), 모양 (num_envs,)
     #    - pos_w = 센서가 붙은 base의 위치. cfg의 offset (0, 0, 20)은 ray 시작점에만 더해지고 여기에는 없음
     #    - (num_envs, 187)에서 빼려면 센서 높이에 둘째 축을 추가 (unsqueeze)
+    #      x.unsqueeze(축 번호): 그 자리에 크기 1인 축 추가 (축 번호는 0부터). (N, 1) - (N, 187) → (N, 187)
     # 3. 닿은 점: sensor.data.ray_hits_w, 모양 (num_envs, 187, 3). z는 마지막 축의 2번
+    #    - 마지막 축 고르기: x[..., 2] ("..." = 앞의 축을 모두 그대로 둠)
     # 4. 위 함수 height_scan_finite가 이 함수를 부르고, 안 닿은 ray(inf)를 0으로 바꿈 (제공)
     # extract the used quantities (to enable type-hinting)
     sensor: RayCaster = env.scene.sensors[sensor_cfg.name]

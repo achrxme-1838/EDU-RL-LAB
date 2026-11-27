@@ -58,6 +58,7 @@ def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = Scen
     #   - 센서는 sensor_cfg, 발 선택은 sensor_cfg.body_ids
     # - 발 속도: env.scene[asset_cfg.name].data.body_lin_vel_w, 발 선택은 asset_cfg.body_ids, xy는 [..., :2]
     #   - 센서와 로봇은 서로 다른 객체. body_ids도 각자의 것을 씀
+    # - True/False 텐서에 숫자 텐서를 곱하면 True = 1, False = 0으로 계산됨 → 닿은 발의 속도만 남음
     raise NotImplementedError("w2 목 | 중간-1: feet_slide 미작성")
 
 

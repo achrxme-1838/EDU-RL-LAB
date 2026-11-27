@@ -55,7 +55,7 @@ def contact_forces(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEn
     # - 출력: (num_envs,), N
     # - 1–3단계는 위 undesired_contacts(풀이 예시)와 같음
     # - 바꿀 곳: "threshold보다 큰가(참/거짓)" 대신 "threshold를 넘은 양"
-    #   - 넘지 않은 곳은 0이 되게 자르기: .clip(min=0.0)
+    #   - 넘지 않은 곳(음수)은 0이 되게 자르기: x.clip(min=0.0) = min보다 작은 값을 min으로 바꿈, 모양 그대로
     raise NotImplementedError("w2 목 | 기본-4: contact_forces 미작성")
 
 
@@ -71,4 +71,12 @@ def foot_clearance_reward(
     # - 뜻: 수평으로 움직이는 발(스윙 중인 발)만 목표 높이에 가까운지 봄. 디딘 발은 속도가 0이라 빠짐
     # - 재료: asset.data.body_pos_w, asset.data.body_lin_vel_w (월드 좌표계)
     #         모양 (num_envs, body 17, 3). 발 선택은 [:, asset_cfg.body_ids, 성분]
+    #
+    # 1. 로봇 가져오기: 수요일 joint 패널티들과 같은 방법
+    # 2. 발 높이 오차의 제곱 → (num_envs, 발 4)
+    # 3. 발 수평 속도의 크기에 tanh → (num_envs, 발 4)
+    # 4. 2와 3을 곱해 발끼리 더하고, 수식대로 std로 나눈 뒤 exp → (num_envs,)
+    # - 쓸 함수
+    #   - torch.square(x) = x², torch.tanh(x), torch.exp(x) = eˣ: 원소마다 계산, 모양 그대로
+    #   - torch.norm(x, dim=축) = 그 축 방향 크기, torch.sum(x, dim=축) = 그 축 방향 합. 둘 다 그 축이 없어짐
     raise NotImplementedError("w2 목 | 중간-2: foot_clearance_reward 미작성")

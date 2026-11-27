@@ -247,7 +247,7 @@ class ObservationsCfg:
         # (여기에 작성)
         #
         # [w2 목 | 기본-1] 관측 noise (policy만, 목요일에 작성)
-        # - 위 4줄에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 noise
+        # - 아래 관측 4줄의 괄호 안에 noise=Unoise(n_min=..., n_max=...) 추가. Unoise = 균등분포 noise
         #   base_ang_vel ±0.2, projected_gravity ±0.05, joint_pos_rel ±0.01, joint_vel_rel ±1.5
         # - velocity_commands, last_action에는 넣지 않음 (센서로 재는 값이 아님)
         # - noise는 __post_init__의 enable_corruption = True일 때만 적용됨
