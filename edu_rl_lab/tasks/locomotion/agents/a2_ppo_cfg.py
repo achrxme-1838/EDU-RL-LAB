@@ -1,4 +1,4 @@
-"""DEX BasePPORunnerCfg hyperparameters on the local feedforward PPO implementation."""
+"""Feedforward PPO hyperparameters for A2 locomotion."""
 
 from isaaclab.utils import configclass
 
@@ -11,7 +11,6 @@ class A2PPORunnerCfg(Go2PPORunnerCfg):
     max_iterations: int = 10001
     save_interval: int = 500
     experiment_name: str = "a2_base_rl"
-    # DEX empirical_normalization=False maps to both normalization flags=False.
     policy: PolicyCfg = PolicyCfg(
         init_noise_std=1.0,
         noise_std_type="scalar",

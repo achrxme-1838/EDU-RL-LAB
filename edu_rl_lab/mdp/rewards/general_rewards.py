@@ -20,7 +20,7 @@ def action_rate_l2(env: ManagerBasedRLEnv) -> torch.Tensor:
 def action_smoothness_l2(
     env: ManagerBasedRLEnv, action_name: str = "LegJointPositionAction"
 ) -> torch.Tensor:
-    """DEX second difference of raw actions: ||a[t] - 2*a[t-1] + a[t-2]||²."""
+    """Second difference of raw actions: ||a[t] - 2*a[t-1] + a[t-2]||²."""
     action = env.action_manager.get_term(action_name)
     return torch.sum(torch.square(action.raw_actions - 2 * action.prev_actions + action.prev_prev_actions), dim=1)
 

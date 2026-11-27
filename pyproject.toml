@@ -12,6 +12,7 @@ license = "Apache-2.0 AND BSD-3-Clause"
 license-files = ["LICENCE", "third_party/*LICENSE"]
 dependencies = [
     "torch>=2.7,<2.8",
+    "onnx>=1.16,<2",
     "numpy>=1.26,<2",
     "tensordict==0.8.3",
     "gymnasium==1.2.0",

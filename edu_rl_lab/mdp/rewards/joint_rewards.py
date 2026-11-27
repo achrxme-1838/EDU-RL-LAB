@@ -104,7 +104,6 @@ def stand_still_joint_deviation_l1(
     return mdp.joint_deviation_l1(env, asset_cfg) * (torch.norm(command[:, :2], dim=1) < command_threshold)
 
 
-# A2 terms ported from DEX_RL_LAB.
 def joint_position_penalty_command_aware(
     env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, stand_still_scale: float, velocity_threshold: float,
     command_name: str | None = "base_velocity",

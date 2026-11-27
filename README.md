@@ -64,7 +64,7 @@ The project-specific `energy` and `joint_position_penalty` rewards live in
 are kept in the `edu_rl_lab.mdp.spot` namespace. MDP reference implementations for
 other robots are included. Go2 and A2 have registered environments.
 
-Math utilities follow DEX's `utils/maths/maths.py` layout and use the official
+Math utilities live in `utils/maths/maths.py` and use the official
 Isaac Lab 2.3.0 implementation. All 59 public functions and internal helpers were
 copied; only the warning output in two deprecated functions was changed to Python
 logging. This module can be imported with just PyTorch and NumPy, without Isaac
@@ -152,32 +152,30 @@ the critic receives 60-dimensional observations, and the policy controls 12 join
 Edit `edu_rl_lab/tasks/locomotion/go2_env_cfg.py` for environment settings and
 `agents/ppo_cfg.py` in the same directory for PPO settings.
 
-### A2 with DEX training settings
+### A2 training settings
 
-`Edu-A2-Velocity-v0` ports `DEX_RL_LAB/dex_rl_lab/tasks/envs/control/a2_base/a2_base_rl.py`
-and its registered `BasePPORunnerCfg` into this repository. Edit
-`edu_rl_lab/tasks/locomotion/a2_env_cfg.py` and `agents/a2_ppo_cfg.py` for this task.
+Configure `Edu-A2-Velocity-v0` in `edu_rl_lab/tasks/locomotion/a2_env_cfg.py`
+and `agents/a2_ppo_cfg.py`.
 
 - Actor: 225 inputs (45 values × 5 frames), `[512, 256, 128]` ELU, 12 actions.
 - Critic: 247 inputs (60 proprioceptive values + 187 height samples), same hidden layers.
-- Observation noise, clipping, scaling and term order match DEX. Histories are
-  flattened per term, oldest to newest, then concatenated in the observation manager.
-  This produces the same network input as DEX's later dictionary concatenation.
-- All 20 reward terms, seven terrain types, commands, curricula, randomization,
-  termination conditions and motor settings match the reference. Action smoothness
+- Observation histories are flattened per term, oldest to newest, then
+  concatenated in the observation manager after noise, clipping and scaling.
+- The environment defines 20 reward terms, seven terrain types, commands, curricula,
+  randomization, termination conditions and motor settings. Action smoothness
   uses the current and two previous raw actions, cleared on episode reset.
 - 4096 environments, 0.005 s physics step, decimation 4, 20 s episodes;
   PPO uses 24 steps/update, 10001 iterations, saves every 500 iterations, and no
   observation normalization. The local PPO implementation is retained.
-- Play follows DEX: 64 environments and a 10 × 6 terrain grid; noise, pushes and
+- Play uses 64 environments and a 10 × 6 terrain grid; noise, pushes and
   curricula remain enabled. It differs from the Go2 play configuration.
 
 The A2 USD overlay and its referenced USD layers are bundled under
 `edu_rl_lab/assets/robots/a2/`, retaining the original relative references and
-geometry. No DEX checkout or Python package is required. The `a2_nero` layers are
+geometry. The `a2_nero` layers are
 the source geometry; the `a2_base` overlay disables the arm and mounting plate.
-Isaac Sim still supplies its built-in shaders; terrain/sky visuals use the same
-Isaac asset service as the reference. `EDU_A2_USD` optionally overrides the model.
+Isaac Sim supplies its built-in shaders; terrain/sky visuals use the
+Isaac asset service. `EDU_A2_USD` optionally overrides the model.
 
 ```bash
 python tests/smoke_a2.py
@@ -187,8 +185,47 @@ tensorboard --logdir logs/rsl_rl/a2_base_rl
 ```
 
 The smoke test uses local visuals, checks model dependencies, observation sizes,
-partial resets and action history, then runs two PPO updates. DEX's separate
-evaluation harness and checkpoint/optimizer format are not ported.
+partial resets and action history, then runs two PPO updates.
+
+### play에서 ONNX 생성 및 배포 폴더로 복사
+
+`scripts/rsl_rl/play.py`는 체크포인트를 불러온 직후 ONNX를 자동 생성한다.
+출력 위치는 `<체크포인트 폴더>/exported/<체크포인트 이름>/policy.onnx`다.
+예를 들어 `model_10001.pt`를 사용하면 `exported/model_10001/policy.onnx`에 저장된다.
+같은 체크포인트로 다시 실행하면 이 파일을 갱신한다.
+
+현재 A2 체크포인트를 생성·복사하는 예시는 다음과 같다. **개발 PC의 기존 Isaac Lab 환경에서** 실행한다.
+ONNX만 생성하고 play를 끝내려면 아래처럼 `--steps 1`을 사용한다.
+
+```bash
+cd /home/lim/rl_ws/edu_rl_lab
+export PYTHONNOUSERSITE=1
+# 기존 환경에 onnx가 없는 경우에만 설치한다. 신규 설치 시에는 프로젝트 의존성에 포함된다.
+python -m pip show onnx >/dev/null 2>&1 || python -m pip install 'onnx>=1.16,<2'
+
+python scripts/rsl_rl/play.py \
+  --task Edu-A2-Velocity-v0 \
+  --checkpoint logs/rsl_rl/a2_base_rl/2026-11-01_22-55-17_105020/model_10001.pt \
+  --headless --num_envs 1 --steps 1
+
+# play가 출력한 ONNX 경로에서 배포 저장소의 정책 폴더로 수동 복사한다.
+A2_ONNX_SOURCE="/home/lim/rl_ws/edu_rl_lab/logs/rsl_rl/a2_base_rl/2026-11-01_22-55-17_105020/exported/model_10001/policy.onnx"
+mkdir -p /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR
+cp -- "$A2_ONNX_SOURCE" /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR/policy.onnx
+sha256sum "$A2_ONNX_SOURCE" /home/lim/rl_ws/unitree_rl_mjlab/networks/01_EDU_A2_STAIR/policy.onnx
+```
+
+일반 play 실행에도 export가 포함되므로 위 1스텝 실행을 별도로 반복할 필요는 없다.
+복사는 사용자가 선택해서 수행하며, play 자체가 다른 저장소에 파일을 복사하지는 않는다.
+다른 정책은 목적지 폴더 이름을 바꿔 저장한다. NX (a2)에는 해당 ONNX를 전달하고
+`unitree_rl_mjlab/deploy/robots/a2/config/deploy.yaml`의
+`policy_dir: networks/01_EDU_A2_STAIR/`에서 **폴더까지** 지정한다.
+배포 절차는 [sim2real 문서](../unitree_rl_mjlab/doc/sim2real.md)를 참고한다.
+
+ONNX에는 actor와 actor의 관측 정규화가 포함된다. A2의 현재 정책은 정규화를 사용하지 않는다.
+입력은 `obs: [1,225]`, 출력은 raw `actions: [1,12]`이며 float32다.
+관측 이력 구성, 관절 매핑, action scale/offset은 배포 코드에서 처리해야 한다.
+원본 체크포인트 이름·SHA-256·task·정규화 여부를 ONNX 메타데이터에 함께 기록한다.
 
 ## Code Checks Without the Simulator
 

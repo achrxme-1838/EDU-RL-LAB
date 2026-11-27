@@ -1,4 +1,4 @@
-"""A2 training settings ported from DEX a2_base_rl, with local MDP implementations."""
+"""A2 locomotion training configuration."""
 
 import math
 

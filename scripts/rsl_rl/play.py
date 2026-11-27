@@ -28,6 +28,7 @@ def main():
 
     from edu_rl_lab.tasks import load_task_configs
     from edu_rl_lab.utils.checkpoints import resolve_checkpoint
+    from edu_rl_lab.utils.export_policy import export_policy_as_onnx
     from edu_rl_lab.utils.vecenv_wrapper import RslRlVecEnvWrapper
     from rsl_rl.runners import OnPolicyRunner
 
@@ -56,6 +57,10 @@ def main():
         runner.load(str(checkpoint), load_optimizer=False)
         policy = runner.get_inference_policy(device=env.device)
         obs = env.get_observations()
+        onnx_path = export_policy_as_onnx(
+            runner.alg.policy, runner.alg.policy.get_actor_obs(obs), checkpoint, task=args.task
+        )
+        print(f"[INFO] ONNX exported: {onnx_path}", flush=True)
         step = 0
         limit = args.steps if args.steps is not None else (args.video_length if args.video else None)
         # 261022 hw: day-5 reset count per termination term (cumulative, printed every 5 s)

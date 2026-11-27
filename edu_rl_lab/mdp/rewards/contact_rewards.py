@@ -36,7 +36,6 @@ def desired_contacts(env, sensor_cfg: SceneEntityCfg, threshold: float = 1.0) ->
     return 1.0 * zero_contact
 
 
-# A2 terms ported from DEX_RL_LAB.
 def contact_forces(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Penalize contact forces as the amount of violations of the net contact force."""
     # extract the used quantities (to enable type-hinting)

@@ -46,7 +46,6 @@ def base_height_l2(
     return torch.square(asset.data.root_pos_w[:, 2] - target_height)
 
 
-# A2 terms ported from DEX_RL_LAB.
 def _mean_finite_hit_height(sensor: RayCaster) -> torch.Tensor:
     """Per-env mean world-z of ray hits, ignoring missed rays.
 
